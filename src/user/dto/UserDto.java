@@ -19,7 +19,5 @@ public class UserDto {
     private LocalDateTime birth;
     private String cardNumber;
     private LocalDateTime cardPeriod;
-    private String lastYearMembershipGrade;
-    private int lastYearVipAmount;
     private boolean employeeYn;
 }
