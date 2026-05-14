@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RewardPolicyDto {
+public class FreeParkingPolicyDto {
 
-    private int rewardPolicyId;
+    private int freeParkingPolicyId;
+    private int branchId;
     private int membershipId;
-    private int offerStandard;
-    private int rewardAmount;
+    private boolean freeParkingAvailable;
 }
