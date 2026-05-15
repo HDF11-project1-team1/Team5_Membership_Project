@@ -21,8 +21,9 @@ public class PurchaseHistoryDto {
     private int price;
     private String purchaseStatus;
     private LocalDateTime generatedDate;
-    private int discountPrice;
+    private int discountPrice;   // 할인된 금액
     private int discountRate;
     private int vipAmount;
     private int mileageAmount;
+    private int finalPrice;       // 실제 구매금액 (price - discountPrice)
 }
