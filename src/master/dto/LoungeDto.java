@@ -1,4 +1,4 @@
-package benefit.dto;
+package master.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

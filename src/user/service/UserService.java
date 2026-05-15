@@ -63,10 +63,6 @@ public class UserService {
         return userDao.updateUser(user);
     }
 
-    public List<MembershipHistoryDto> getMembershipHistories() {
-        return userDao.findAllMembershipHistories();
-    }
-
     private void validateUser(UserDto user, boolean requireUserId) {
         if (user == null) {
             throw new IllegalArgumentException("회원 정보가 없습니다.");

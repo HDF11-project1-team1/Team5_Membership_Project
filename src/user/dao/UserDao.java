@@ -313,48 +313,6 @@ public class UserDao {
         return 0;
     }
 
-    // 6. 등급 변경 이력 조회
-    public List<MembershipHistoryDto> findAllMembershipHistories() {
-
-        List<MembershipHistoryDto> historyList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select h.membership_history_id, h.user_id, h.membership_id, m.membership_grade, " +
-                    "h.start_date, h.end_date, h.calculated_amount " +
-                    "from membership_history h join membership m on h.membership_id = m.membership_id " +
-                    "order by h.start_date, h.membership_history_id";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                MembershipHistoryDto history = new MembershipHistoryDto();
-                history.setMembershipHistoryId(rs.getInt("membership_history_id"));
-                history.setUserId(rs.getInt("user_id"));
-                history.setMembershipId(rs.getInt("membership_id"));
-                history.setMembershipGrade(rs.getString("membership_grade"));
-                history.setStartDate(toLocalDateTime(rs.getTimestamp("start_date")));
-                history.setEndDate(toLocalDateTime(rs.getTimestamp("end_date")));
-                history.setCalculateAmount(rs.getLong("calculated_amount"));
-
-                historyList.add(history);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return historyList;
-    }
-
     private UserDto mapUser(ResultSet rs) throws Exception {
         UserDto user = new UserDto();
 
