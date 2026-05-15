@@ -12,7 +12,7 @@ public class PurchaseHistoryDao {
 
     private static final String SELECT_ALL = "SELECT purchase_history_id, user_id, branch_id, category_id, brand_id, " +
             "       membership_id, payment_id, price, discount_price, discount_rate, " +
-            "       purchase_status, generated_date, vip_amount, mileage_amount " +
+            "       purchase_status, generated_date, vip_amount, mileage_amount, final_price " +
             "FROM purchase_history ";
 
     /**
@@ -99,6 +99,7 @@ public class PurchaseHistoryDao {
         }
         dto.setVipAmount(rs.getInt("vip_amount"));
         dto.setMileageAmount(rs.getInt("mileage_amount"));
+        dto.setFinalPrice(rs.getInt("final_price"));
         return dto;
     }
 }
