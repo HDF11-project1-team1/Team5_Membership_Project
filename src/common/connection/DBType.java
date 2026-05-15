@@ -4,5 +4,6 @@ public enum DBType {
     ORACLE,
     MARIADB,
     MYSQL,
-    MSSQL
+    MSSQL,
+    LOCALDB
 }

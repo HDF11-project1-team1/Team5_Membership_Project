@@ -16,6 +16,9 @@ public class DBConnection {
                 case MARIADB:
                     conn = DriverManager.getConnection("jdbc:mariadb://localhost:3307/sampledb", "kosa", "1004");
                     break;
+                case LOCALDB:
+                    conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/XEPDB1", "HF05_SUB", "1004");
+                    break;
             }
         } catch (Exception e) {
             System.out.println("connection Factory : " + e.getMessage());
@@ -35,6 +38,9 @@ public class DBConnection {
                     break;
                 case MARIADB:
                     conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/sampledb", id, pwd);
+                    break;
+                case LOCALDB:
+                    conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/XEPDB1", id, pwd);
                     break;
             }
         } catch (Exception e) {
