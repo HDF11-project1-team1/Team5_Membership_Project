@@ -55,13 +55,14 @@ public class LoungeDao {
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setString(1, loungeName));
     }
 
-    public boolean hasLoungePolicyByLoungeId(int loungeId) {
+    public boolean existsLoungePolicyByLoungeId(int loungeId) {
         String sql = "SELECT COUNT(*) FROM lounge_policy WHERE lounge_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, loungeId));
     }
 
-    public boolean hasLoungeHistoryByLoungeId(int loungeId) {
+    public boolean existsLoungeHistoryByLoungeId(int loungeId) {
         String sql = "SELECT COUNT(*) FROM lounge_history WHERE lounge_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, loungeId));
     }
 }
+

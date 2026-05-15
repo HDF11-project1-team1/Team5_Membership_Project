@@ -13,3 +13,4 @@ public class GreenVehicleBranchDto {
     private int branchId;
     private int modifiedCount;
 }
+

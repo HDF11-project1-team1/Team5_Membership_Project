@@ -17,3 +17,4 @@ public class MembershipDto {
     private int specialDiscountAmount;
     private int coffeeCount;
 }
+

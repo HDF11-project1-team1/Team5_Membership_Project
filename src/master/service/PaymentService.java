@@ -26,12 +26,12 @@ public class PaymentService {
     }
 
     // ===== 결제수단 목록 조회 =====
-    public List<PaymentDto> findPaymentList() {
+    public List<PaymentDto> getPaymentList() {
         return paymentDao.selectAllPayments();
     }
 
     // ===== 결제수단 상세 조회 =====
-    public PaymentDto findPaymentDetail(int paymentId) {
+    public PaymentDto getPaymentDetail(int paymentId) {
         if (!isValidId(paymentId)) {
             return null;
         }
@@ -51,3 +51,4 @@ public class PaymentService {
         return paymentDao.updatePayment(paymentDto) > 0;
     }
 }
+

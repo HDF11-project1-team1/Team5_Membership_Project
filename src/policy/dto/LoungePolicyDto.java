@@ -15,3 +15,4 @@ public class LoungePolicyDto {
     private int membershipId;
     private boolean loungeAvailable;
 }
+

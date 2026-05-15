@@ -15,3 +15,4 @@ public class RewardHistoryDto {
     private int rewardAmount;
     private LocalDate offerDate;
 }
+

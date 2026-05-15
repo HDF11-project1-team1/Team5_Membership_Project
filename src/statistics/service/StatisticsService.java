@@ -10,7 +10,6 @@ public class StatisticsService {
 
     private final StatisticsDao dao = new StatisticsDao();
 
-    // ── 단월 조회 ──────────────────────────────────────────────────────
     public List<StatDto> getStatByCategory(int y, int m) {
         return dao.selectStatByCategory(y, m);
     }
@@ -51,7 +50,7 @@ public class StatisticsService {
         return dao.selectVipChangeByAgeGender(y, m);
     }
 
-    // ── 월별 추이 조회 (Swing 차트용) ──────────────────────────────────
+    // 월별 추이 조회(Swing 차트용)
     public List<MonthlyStatDto> getMonthlyCategoryTrend(int year) {
         return dao.selectMonthlyCategoryTrend(year);
     }

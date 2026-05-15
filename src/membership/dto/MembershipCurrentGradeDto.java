@@ -15,3 +15,4 @@ public class MembershipCurrentGradeDto {
     private int membershipId;
     private String membershipGrade;
 }
+

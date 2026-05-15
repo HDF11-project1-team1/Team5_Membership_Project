@@ -31,20 +31,20 @@ public class BrandService {
     }
 
     // ===== 브랜드 목록 조회 =====
-    public List<BrandDto> findBrandList() {
+    public List<BrandDto> getBrandList() {
         return brandDao.selectAllBrands();
     }
 
     // ===== 브랜드 상세 조회 =====
-    public BrandDto findBrandDetail(int brandId) {
+    public BrandDto getBrandDetail(int brandId) {
         if (!isValidId(brandId)) {
             return null;
         }
         return brandDao.selectBrandById(brandId);
     }
 
-    // ===== 카테고리로 브랜드 찾기 =====
-    public List<BrandDto> findBrandListByCategory(int categoryId) {
+    // ===== 카테고리별 브랜드 조회 =====
+    public List<BrandDto> getBrandListByCategory(int categoryId) {
         if (!isValidId(categoryId)) {
             return null;
         }
@@ -63,5 +63,4 @@ public class BrandService {
         BrandDto brandDto = new BrandDto(brandId, categoryId, brandName);
         return brandDao.updateBrand(brandDto) > 0;
     }
-
 }

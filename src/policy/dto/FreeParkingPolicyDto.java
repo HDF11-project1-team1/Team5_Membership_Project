@@ -14,3 +14,4 @@ public class FreeParkingPolicyDto {
     private int membershipId;
     private boolean freeParkingAvailable;
 }
+

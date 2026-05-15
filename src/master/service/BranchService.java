@@ -12,7 +12,7 @@ public class BranchService {
 
     private final BranchDao branchDao = new BranchDao();
 
-    // ===== 지점등록 =====
+    // ===== 지점 등록 =====
     public boolean registerBranch(String branchName, String branchAddress) {
         if (!hasText(branchName) || !hasText(branchAddress)) {
             return false;
@@ -26,12 +26,12 @@ public class BranchService {
     }
 
     // ===== 전체 지점 목록 조회 =====
-    public List<BranchDto> findBranchList() {
+    public List<BranchDto> getBranchList() {
         return branchDao.selectAllBranches();
     }
 
-    // ===== 특정 브랜치 상세 조회 =====
-    public BranchDto findBranchDetail(int branchId) {
+    // ===== 특정 지점 상세 조회 =====
+    public BranchDto getBranchDetail(int branchId) {
         if (!isValidId(branchId)) {
             return null;
         }
@@ -52,3 +52,4 @@ public class BranchService {
     }
 
 }
+

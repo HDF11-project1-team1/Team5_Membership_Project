@@ -7,20 +7,22 @@ import benefit.dto.UserInfoDto;
 import benefit.dto.VehicleDto;
 
 import common.connection.DBConnection;
+import common.connection.DBType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 public class BenefitDao {
 
-    // ═══════════════════════════════════════════════════
-    // 1. 라운지 이용가능 여부 확인
-    // ═══════════════════════════════════════════════════
-
-    /** 멤버십 등급, 지점명, 라운지명으로 라운지 이용가능 여부 조회 */
-    public boolean getLoungePolicyAvailable(Connection conn, String membershipGrade, String branchName,
+    // 멤버십 등급, 지점명, 라운지명으로 라운지 이용 가능 여부를 조회한다.
+    public boolean selectLoungePolicyAvailable(Connection conn, String membershipGrade, String branchName,
             String loungeName) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -48,12 +50,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 2. Cafe-H 커피 지급수 조회
-    // ═══════════════════════════════════════════════════
 
-    /** 멤버십 등급별 Cafe-H 무료 커피 제공 횟수 조회 */
-    public int getCafeHPolicyCount(Connection conn, String membershipGrade) throws Exception {
+    // 멤버십 등급별 Cafe-H 무료 커피 제공 개수를 조회한다.
+    public int selectCafeHPolicyCount(Connection conn, String membershipGrade) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -71,12 +70,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 3. 차량 등록 / 변경
-    // ═══════════════════════════════════════════════════
 
-    /** 회원 이름으로 유저 기본 정보(userId, membershipId, grade) 조회 */
-    public UserInfoDto getUserInfoByName(Connection conn, String name) throws Exception {
+    // 회원명으로 회원 ID, 멤버십 ID, 멤버십 등급을 조회한다.
+    public UserInfoDto selectUserInfoByName(Connection conn, String name) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -101,8 +97,8 @@ public class BenefitDao {
         }
     }
 
-    /** 회원의 현재 등록 차량 대수 조회 */
-    public int getVehicleCount(Connection conn, int userId) throws Exception {
+    // 회원이 등록한 차량 수를 조회한다.
+    public int selectVehicleCount(Connection conn, int userId) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -119,7 +115,7 @@ public class BenefitDao {
         }
     }
 
-    /** 차량 등록 (INSERT) */
+    // 회원 차량 정보를 등록한다.
     public int insertVehicle(Connection conn, VehicleDto vehicle) throws Exception {
         PreparedStatement pstmt = null;
         try {
@@ -134,8 +130,8 @@ public class BenefitDao {
         }
     }
 
-    /** 차량의 마지막 등록(변경)일 조회 — 월 1회 변경 제한 검증용 */
-    public java.sql.Date getVehicleRegisteredDate(Connection conn, int userId, String carNumber) throws Exception {
+    // 차량 등록일을 조회한다.
+    public java.sql.Date selectVehicleRegisteredDate(Connection conn, int userId, String carNumber) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -153,7 +149,7 @@ public class BenefitDao {
         }
     }
 
-    /** 차량 번호 변경 (registered_date도 SYSDATE로 갱신) */
+    // 등록 차량번호를 변경하고 등록일을 갱신한다.
     public int updateVehicle(Connection conn, VehicleDto newVehicle, String oldCarNumber) throws Exception {
         PreparedStatement pstmt = null;
         try {
@@ -169,12 +165,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 4. 무료주차 가능 여부 확인
-    // ═══════════════════════════════════════════════════
 
-    /** 회원 이름 + 차량번호로 회원·차량 통합 정보 조회 */
-    public UserInfoDto getUserAndVehicleInfo(Connection conn, String name, String carNumber) throws Exception {
+    // 회원명과 차량번호로 무료주차/발레파킹 판단에 필요한 정보를 조회한다.
+    public UserInfoDto selectUserAndVehicleInfo(Connection conn, String name, String carNumber) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -202,8 +195,8 @@ public class BenefitDao {
         }
     }
 
-    /** 멤버십 ID + 지점명으로 무료주차 정책 존재 여부 조회 */
-    public boolean getFreeParkingPolicy(Connection conn, int membershipId, String branchName) throws Exception {
+    // 멤버십과 지점 기준 무료주차 정책 적용 여부를 조회한다.
+    public boolean selectFreeParkingPolicy(Connection conn, int membershipId, String branchName) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -225,8 +218,8 @@ public class BenefitDao {
         }
     }
 
-    /** GREEN 등급 회원의 특정 지점 차량 등록 여부 확인 */
-    public boolean hasGreenBranchByBranchName(Connection conn, int userId, String branchName) throws Exception {
+    // GREEN 등급 회원의 등록 지점 여부를 확인한다.
+    public boolean existsGreenBranchByBranchName(Connection conn, int userId, String branchName) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -245,8 +238,8 @@ public class BenefitDao {
         }
     }
 
-    /** 오늘 입차된 최근 주차 기록 1건 조회 */
-    public ParkingHistoryDto getTodayParkingHistory(Connection conn, int vehicleId) throws Exception {
+    // 해당 차량의 당일 주차 이력을 조회한다.
+    public ParkingHistoryDto selectTodayParkingHistory(Connection conn, int vehicleId) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -275,12 +268,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 5. 발레파킹 가능 여부 확인
-    // ═══════════════════════════════════════════════════
 
-    /** 회원의 작년 산정적립금 조회 (기록 없으면 -1) */
-    public int getLastYearCalculatedAmount(Connection conn, int userId) throws Exception {
+    // 회원의 전년도 VIP 산정금액을 조회한다.
+    public int selectLastYearCalculatedAmount(Connection conn, int userId) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -302,8 +292,8 @@ public class BenefitDao {
         }
     }
 
-    /** 발레파킹 정책(적립금 허용 구간) 존재 여부 조회 */
-    public boolean isValetPolicyAvailable(Connection conn, int membershipId, String branchName, int calculatedAmount)
+    // 멤버십, 지점, 산정금액 기준 발레파킹 정책 적용 여부를 확인한다.
+    public boolean existsValetPolicyAvailable(Connection conn, int membershipId, String branchName, int calculatedAmount)
             throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -331,8 +321,8 @@ public class BenefitDao {
         }
     }
 
-    /** 회원 ID + 차량번호로 본인 소유 차량 ID 조회 (없으면 -1) */
-    public int getVehicleIdByCarNumber(Connection conn, int userId, String carNumber) throws Exception {
+    // 회원 ID와 차량번호로 차량 ID를 조회한다.
+    public int selectVehicleIdByCarNumber(Connection conn, int userId, String carNumber) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -350,8 +340,8 @@ public class BenefitDao {
         }
     }
 
-    /** 특정 차량의 오늘 발레파킹 사용 이력 존재 여부 확인 */
-    public boolean hasValetHistoryToday(Connection conn, int vehicleId) throws Exception {
+    // 해당 차량이 오늘 발레파킹을 이미 사용했는지 확인한다.
+    public boolean existsValetHistoryToday(Connection conn, int vehicleId) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -370,12 +360,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 6. 특별할인 잔액 조회
-    // ═══════════════════════════════════════════════════
 
-    /** 회원 이름으로 특별할인 잔액 조회 (회원 없으면 -1) */
-    public int getSpecialDiscountBalance(Connection conn, String name) throws Exception {
+    // 회원의 특별할인 잔액을 조회한다.
+    public int selectSpecialDiscountBalance(Connection conn, String name) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -397,12 +384,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 7. 그린 차량 지점 등록
-    // ═══════════════════════════════════════════════════
 
-    /** 지점명으로 지점 ID 조회 (없으면 -1) */
-    public int getBranchIdByName(Connection conn, String branchName) throws Exception {
+    // 지점명으로 지점 ID를 조회한다.
+    public int selectBranchIdByName(Connection conn, String branchName) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -420,8 +404,8 @@ public class BenefitDao {
         }
     }
 
-    /** GREEN 등급 회원의 지점 변경 횟수 조회 (미등록 시 -1) */
-    public int getGreenBranchModifiedCount(Connection conn, int userId) throws Exception {
+    // GREEN 등급 등록 지점 변경 횟수를 조회한다.
+    public int selectGreenBranchModifiedCount(Connection conn, int userId) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -440,7 +424,7 @@ public class BenefitDao {
         }
     }
 
-    /** GREEN 등급 회원의 무료주차 지점 최초 등록 */
+    // GREEN 등급 회원의 이용 지점을 등록한다.
     public int insertGreenBranch(Connection conn, GreenVehicleBranchDto branchDto) throws Exception {
         PreparedStatement pstmt = null;
         try {
@@ -455,7 +439,7 @@ public class BenefitDao {
         }
     }
 
-    /** GREEN 등급 회원의 무료주차 지점 변경 + 변경 횟수 증가 */
+    // GREEN 등급 회원의 이용 지점을 변경한다.
     public int updateGreenBranch(Connection conn, GreenVehicleBranchDto branchDto) throws Exception {
         PreparedStatement pstmt = null;
         try {
@@ -471,12 +455,9 @@ public class BenefitDao {
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // 8. 리워드 지급 이력 조회
-    // ═══════════════════════════════════════════════════
 
-    /** 회원 이름으로 리워드 지급 이력 전체 조회 */
-    public java.util.List<RewardHistoryDto> getRewardHistoryByName(Connection conn, String name) throws Exception {
+    // 회원명으로 리워드 제공 이력을 조회한다.
+    public java.util.List<RewardHistoryDto> selectRewardHistoryByName(Connection conn, String name) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -505,6 +486,291 @@ public class BenefitDao {
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
+        }
+    }
+
+    // 라운지 이용 가능 여부 조회 기능을 수행한다.
+    public boolean selectLoungePolicyAvailability(String membershipGrade, String branchName, String loungeName) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            return selectLoungePolicyAvailable(conn, membershipGrade, branchName, loungeName);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    // Cafe-H 무료 커피 제공 개수 조회 기능을 수행한다.
+    public int selectCafeHPolicyCount(String membershipGrade) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            return selectCafeHPolicyCount(conn, membershipGrade);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return 0;
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    // 회원명으로 차량 등록을 처리한다.
+    public String insertVehicleByUserName(String name, String carNumber) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            conn.setAutoCommit(false);
+
+            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            if (userInfo == null) {
+                return "[차량 등록 실패] 회원을 찾을 수 없습니다.";
+            }
+
+            int userId = userInfo.getUserId();
+            String grade = userInfo.getMembershipGrade();
+            if (grade.equalsIgnoreCase("BASIC")) {
+                return "[차량 등록 실패] BASIC 등급은 차량을 등록할 수 없습니다.";
+            }
+
+            int currentCount = selectVehicleCount(conn, userId);
+            boolean isJasminTop = grade.equalsIgnoreCase("JASMIN SIGNATURE") || grade.equalsIgnoreCase("JASMIN BLACK");
+            int maxLimit = isJasminTop ? 2 : 1;
+            if (currentCount >= maxLimit) {
+                return "[차량 등록 실패] 차량 등록 가능 대수를 초과했습니다.";
+            }
+
+            VehicleDto vehicleDto = new VehicleDto();
+            vehicleDto.setUserId(userId);
+            vehicleDto.setCarNumber(carNumber);
+            insertVehicle(conn, vehicleDto);
+
+            conn.commit();
+            return "[차량 등록 성공] 차량번호: " + carNumber;
+        } catch (Exception e) {
+            rollback(conn);
+            return "[차량 등록 실패] " + e.getMessage();
+        } finally {
+            resetAutoCommit(conn);
+            DBConnection.close(conn);
+        }
+    }
+
+    // 회원명으로 등록 차량 변경을 처리한다.
+    public String updateVehicleByUserName(String name, String oldCarNumber, String newCarNumber) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            conn.setAutoCommit(false);
+
+            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            if (userInfo == null) {
+                return "[차량 변경 실패] 회원을 찾을 수 없습니다.";
+            }
+
+            int userId = userInfo.getUserId();
+            java.sql.Date regDate = selectVehicleRegisteredDate(conn, userId, oldCarNumber);
+            if (regDate == null) {
+                return "[차량 변경 실패] 등록된 차량을 찾을 수 없습니다.";
+            }
+
+            Calendar regCal = Calendar.getInstance();
+            regCal.setTime(regDate);
+            Calendar nowCal = Calendar.getInstance();
+            boolean sameMonth = regCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
+                    && regCal.get(Calendar.MONTH) == nowCal.get(Calendar.MONTH);
+            if (sameMonth) {
+                return "[차량 변경 실패] 이번 달에 이미 변경했습니다.";
+            }
+
+            VehicleDto newVehicle = new VehicleDto();
+            newVehicle.setUserId(userId);
+            newVehicle.setCarNumber(newCarNumber);
+            int updated = updateVehicle(conn, newVehicle, oldCarNumber);
+            if (updated == 0) {
+                return "[차량 변경 실패] 변경된 차량이 없습니다.";
+            }
+
+            conn.commit();
+            return "[차량 변경 성공] " + oldCarNumber + " -> " + newCarNumber;
+        } catch (Exception e) {
+            rollback(conn);
+            return "[차량 변경 실패] " + e.getMessage();
+        } finally {
+            resetAutoCommit(conn);
+            DBConnection.close(conn);
+        }
+    }
+
+    // 무료주차 이용 가능 여부를 조회한다.
+    public String selectFreeParkingAvailability(String branchName, String name, String carNumber) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+
+            UserInfoDto userInfo = selectUserAndVehicleInfo(conn, name, carNumber);
+            if (userInfo == null) {
+                return "[무료주차] 회원 또는 등록 차량을 찾을 수 없습니다.";
+            }
+
+            boolean hasPolicy = selectFreeParkingPolicy(conn, userInfo.getMembershipId(), branchName);
+            if (!hasPolicy) {
+                return "[무료주차] 해당 지점/등급의 무료주차 정책이 없습니다.";
+            }
+
+            String grade = userInfo.getMembershipGrade();
+            if (grade.equalsIgnoreCase("GREEN 2") || grade.equalsIgnoreCase("EARLY GREEN")) {
+                if (!existsGreenBranchByBranchName(conn, userInfo.getUserId(), branchName)) {
+                    return "[무료주차] GREEN 등급은 등록 지점에서만 이용 가능합니다.";
+                }
+            }
+
+            ParkingHistoryDto todayHistory = selectTodayParkingHistory(conn, userInfo.getVehicleId());
+            if (todayHistory != null) {
+                if (todayHistory.getExitDate() == null) {
+                    long minutes = ChronoUnit.MINUTES.between(todayHistory.getEntryDate(), LocalDateTime.now());
+                    return minutes <= 180 ? "[무료주차] 현재 무료주차 가능" : "[무료주차] 3시간 초과";
+                }
+                return "[무료주차] 오늘 이미 무료주차를 사용했습니다.";
+            }
+
+            return "[무료주차] 무료주차 가능";
+        } catch (Exception e) {
+            return "[무료주차] 오류 발생: " + e.getMessage();
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    // 발레파킹 이용 가능 여부를 조회한다.
+    public String selectValetParkingAvailability(String branchName, String name, String carNumber) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+
+            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            if (userInfo == null) {
+                return "[발레파킹] 회원을 찾을 수 없습니다.";
+            }
+
+            int calculatedAmount = selectLastYearCalculatedAmount(conn, userInfo.getUserId());
+            if (calculatedAmount == -1) {
+                return "[발레파킹] 전년도 산정금액 이력이 없습니다.";
+            }
+
+            boolean policyOk = existsValetPolicyAvailable(conn, userInfo.getMembershipId(), branchName, calculatedAmount);
+            if (!policyOk) {
+                return "[발레파킹] 정책 조건에 맞지 않습니다.";
+            }
+
+            int vehicleId = selectVehicleIdByCarNumber(conn, userInfo.getUserId(), carNumber);
+            if (vehicleId == -1) {
+                return "[발레파킹] 등록 차량을 찾을 수 없습니다.";
+            }
+
+            if (existsValetHistoryToday(conn, vehicleId)) {
+                return "[발레파킹] 오늘 이미 사용했습니다.";
+            }
+
+            return "[발레파킹] 발레파킹 가능";
+        } catch (Exception e) {
+            return "[발레파킹] 오류 발생: " + e.getMessage();
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    // 회원명으로 특별할인 잔액 조회 기능을 수행한다.
+    public int selectSpecialDiscountBalance(String name) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            return selectSpecialDiscountBalance(conn, name);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return -1;
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    // 회원명으로 GREEN 등급 이용 지점 변경을 처리한다.
+    public String updateGreenBranchByUserName(String name, String newBranchName) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            conn.setAutoCommit(false);
+
+            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            if (userInfo == null) {
+                return "[지점 변경 실패] 회원을 찾을 수 없습니다.";
+            }
+
+            int newBranchId = selectBranchIdByName(conn, newBranchName);
+            if (newBranchId == -1) {
+                return "[지점 변경 실패] 지점을 찾을 수 없습니다.";
+            }
+
+            int modifiedCount = selectGreenBranchModifiedCount(conn, userInfo.getUserId());
+            GreenVehicleBranchDto branchDto = new GreenVehicleBranchDto();
+            branchDto.setUserId(userInfo.getUserId());
+            branchDto.setBranchId(newBranchId);
+
+            if (modifiedCount == -1) {
+                insertGreenBranch(conn, branchDto);
+                conn.commit();
+                return "[지점 등록 성공] " + newBranchName;
+            }
+
+            if (modifiedCount >= 2) {
+                return "[지점 변경 실패] 지점 변경 가능 횟수를 초과했습니다.";
+            }
+
+            updateGreenBranch(conn, branchDto);
+            conn.commit();
+            return "[지점 변경 성공] " + newBranchName;
+        } catch (Exception e) {
+            rollback(conn);
+            return "[지점 변경 실패] " + e.getMessage();
+        } finally {
+            resetAutoCommit(conn);
+            DBConnection.close(conn);
+        }
+    }
+
+    // 회원명으로 리워드 이력 조회 기능을 수행한다.
+    public List<RewardHistoryDto> selectRewardHistory(String name) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            return selectRewardHistoryByName(conn, name);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Collections.emptyList();
+        } finally {
+            DBConnection.close(conn);
+        }
+    }
+
+    private void rollback(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void resetAutoCommit(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 

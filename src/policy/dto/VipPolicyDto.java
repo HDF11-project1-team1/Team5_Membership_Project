@@ -14,3 +14,4 @@ public class VipPolicyDto {
     private int paymentId;
     private int vipRate;
 }
+

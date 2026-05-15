@@ -25,3 +25,4 @@ public class InputValidator {
         return minStandard >= 0 && maxStandard >= minStandard;
     }
 }
+

@@ -72,8 +72,9 @@ public class BrandDao {
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setString(1, brandName));
     }
 
-    public boolean hasPurchaseByBrandId(int brandId) {
+    public boolean existsPurchaseByBrandId(int brandId) {
         String sql = "SELECT COUNT(*) FROM purchase WHERE brand_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, brandId));
     }
 }
+

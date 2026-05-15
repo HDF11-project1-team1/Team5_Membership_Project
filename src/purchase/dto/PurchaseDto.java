@@ -21,3 +21,4 @@ public class PurchaseDto {
     private String purchaseStatus;
     private LocalDateTime generatedDate;
 }
+

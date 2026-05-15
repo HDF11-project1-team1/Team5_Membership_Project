@@ -19,3 +19,4 @@ public class MembershipHistoryDto {
     private LocalDateTime endDate;
     private long calculateAmount;
 }
+
