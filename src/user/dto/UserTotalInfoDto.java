@@ -31,3 +31,4 @@ public class UserTotalInfoDto {
     private int visitDateCount;
     private int purchaseDateCount;
 }
+

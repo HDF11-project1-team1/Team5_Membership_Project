@@ -2,6 +2,7 @@ package purchase.dao;
 
 import common.connection.DBConnection;
 import common.connection.DBType;
+import membership.dto.MembershipDto;
 import purchase.dto.PurchaseHistoryDto;
 
 import java.sql.*;
@@ -14,6 +15,35 @@ public class PurchaseHistoryDao {
             "       membership_id, payment_id, price, discount_price, discount_rate, " +
             "       purchase_status, generated_date, vip_amount, mileage_amount, final_price " +
             "FROM purchase_history ";
+
+    public List<MembershipDto> selectAllMemberships() {
+        List<MembershipDto> list = new ArrayList<>();
+        String sql = "SELECT membership_id, membership_grade FROM membership ORDER BY membership_id";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                MembershipDto dto = new MembershipDto();
+                dto.setMembershipId(rs.getInt("membership_id"));
+                dto.setMembershipGrade(rs.getString("membership_grade"));
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            System.out.println("PurchaseHistoryDao.selectAllMemberships : " + e.getMessage());
+        } finally {
+            DBConnection.close(rs);
+            DBConnection.close(pstmt);
+            DBConnection.close(conn);
+        }
+        return list;
+    }
 
     /**
      * 회원 ID로 구매 이력 조회
@@ -79,7 +109,7 @@ public class PurchaseHistoryDao {
         return list;
     }
 
-    // ResultSet → PurchaseHistoryDto 매핑
+    // ResultSet을 PurchaseHistoryDto로 매핑
     private PurchaseHistoryDto mapRow(ResultSet rs) throws SQLException {
         PurchaseHistoryDto dto = new PurchaseHistoryDto();
         dto.setPurchaseHistoryId(rs.getInt("purchase_history_id"));
@@ -103,3 +133,4 @@ public class PurchaseHistoryDao {
         return dto;
     }
 }
+

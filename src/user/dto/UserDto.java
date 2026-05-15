@@ -21,3 +21,4 @@ public class UserDto {
     private LocalDateTime cardPeriod;
     private boolean employeeYn;
 }
+

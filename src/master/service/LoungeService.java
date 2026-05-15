@@ -12,7 +12,7 @@ public class LoungeService {
 
     private final LoungeDao loungeDao = new LoungeDao();
 
-    // ===== 라운지 등록 =====
+    // ===== ?쇱슫吏 ?깅줉 =====
     public boolean registerLounge(String loungeName) {
         if (!hasText(loungeName)) {
             return false;
@@ -26,19 +26,19 @@ public class LoungeService {
     }
 
     // ===== 라운지 목록 조회 =====
-    public List<LoungeDto> findLoungeList() {
+    public List<LoungeDto> getLoungeList() {
         return loungeDao.selectAllLounges();
     }
 
     // ===== 라운지 상세 조회 =====
-    public LoungeDto findLoungeDetail(int loungeId) {
+    public LoungeDto getLoungeDetail(int loungeId) {
         if (!isValidId(loungeId)) {
             return null;
         }
         return loungeDao.selectLoungeById(loungeId);
     }
 
-    // ===== 라운지 수정 =====
+    // ===== ?쇱슫吏 ?섏젙 =====
     public boolean updateLounge(int loungeId, String loungeName) {
         if (!isValidId(loungeId) || !hasText(loungeName)) {
             return false;
@@ -52,3 +52,4 @@ public class LoungeService {
     }
 
 }
+

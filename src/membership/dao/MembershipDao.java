@@ -147,3 +147,4 @@ public class MembershipDao {
         return timestamp == null ? null : timestamp.toLocalDateTime();
     }
 }
+

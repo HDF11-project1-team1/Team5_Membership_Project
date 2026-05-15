@@ -21,31 +21,31 @@ public class UserService {
     }
 
     public List<UserDto> getAllUsers() {
-        return userDao.findAllUsers();
+        return userDao.selectAllUsers();
     }
 
     public List<MembershipDto> getMemberships() {
-        return userDao.findAllMemberships();
+        return userDao.selectAllMemberships();
     }
 
     public List<UserDto> getUsersByMembershipId(int membershipId) {
         validatePositive(membershipId, "멤버십 ID");
-        return userDao.findUsersByMembershipId(membershipId);
+        return userDao.selectUsersByMembershipId(membershipId);
     }
 
     public UserTotalInfoDto getUserDetailByNameAndBirth(String name, LocalDate birth) {
         validateNotBlank(name, "이름");
 
         if (birth == null) {
-            throw new IllegalArgumentException("생년월일은 필수입니다.");
+            throw new IllegalArgumentException("생년월일을 입력해주세요.");
         }
 
-        return userDao.findUserDetailByNameAndBirth(name, birth);
+        return userDao.selectUserDetailByNameAndBirth(name, birth);
     }
 
     public int registerUser(UserDto user) {
         validateUser(user, false);
-        return userDao.registerUser(user);
+        return userDao.insertUser(user);
     }
 
     public int updateUser(UserDto user) {
@@ -72,11 +72,11 @@ public class UserService {
         }
 
         if (user.getBirth() == null) {
-            throw new IllegalArgumentException("생년월일은 필수입니다.");
+            throw new IllegalArgumentException("생년월일을 입력해주세요.");
         }
 
         if (user.getCardPeriod() == null) {
-            throw new IllegalArgumentException("카드 유효기간은 필수입니다.");
+            throw new IllegalArgumentException("카드 유효기간을 입력해주세요.");
         }
     }
 
@@ -88,7 +88,7 @@ public class UserService {
 
     private void validateNotBlank(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + "은(는) 필수입니다.");
+            throw new IllegalArgumentException(fieldName + "을(를) 입력해주세요.");
         }
     }
 }

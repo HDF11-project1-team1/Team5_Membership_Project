@@ -15,3 +15,4 @@ public class MileagePolicyDto {
     private int paymentId;
     private int mileageRate;
 }
+

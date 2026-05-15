@@ -13,3 +13,4 @@ public class BrandDto {
     private int categoryId;
     private String brandName;
 }
+

@@ -27,3 +27,4 @@ public class PurchaseHistoryDto {
     private int mileageAmount;
     private int finalPrice;       // 실제 구매금액 (price - discountPrice)
 }
+

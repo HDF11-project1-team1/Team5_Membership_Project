@@ -16,3 +16,4 @@ public class ValetPolicyDto {
     private int lastYearVipMaxStandard;
     private boolean valetAvailable;
 }
+

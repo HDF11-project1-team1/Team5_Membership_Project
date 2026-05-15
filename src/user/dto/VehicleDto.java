@@ -16,3 +16,4 @@ public class VehicleDto {
     private String carNumber;
     private LocalDateTime registeredDate;
 }
+

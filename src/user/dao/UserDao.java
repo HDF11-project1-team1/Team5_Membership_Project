@@ -19,7 +19,7 @@ import java.util.List;
 public class UserDao {
 
     // 1. 전체 회원 조회
-    public List<UserDto> findAllUsers() {
+    public List<UserDto> selectAllUsers() {
 
         List<UserDto> userList = new ArrayList<>();
 
@@ -49,7 +49,7 @@ public class UserDao {
     }
 
     // 2. 회원 상세 조회 (기본정보 + 상세정보)
-    public UserTotalInfoDto findUserDetailByNameAndBirth(String name, LocalDate birth) {
+    public UserTotalInfoDto selectUserDetailByNameAndBirth(String name, LocalDate birth) {
 
         UserTotalInfoDto user = null;
 
@@ -85,7 +85,7 @@ public class UserDao {
     }
 
     // pre 3. 멤버십 종류 조회
-    public List<MembershipDto> findAllMemberships() {
+    public List<MembershipDto> selectAllMemberships() {
 
         List<MembershipDto> membershipList = new ArrayList<>();
 
@@ -125,7 +125,7 @@ public class UserDao {
     }
 
     // 3. 멤버십별 회원 조회
-    public List<UserDto> findUsersByMembershipId(int membershipId) {
+    public List<UserDto> selectUsersByMembershipId(int membershipId) {
 
         List<UserDto> userList = new ArrayList<>();
 
@@ -157,7 +157,7 @@ public class UserDao {
     }
 
     // 4. 신규 회원 등록
-    public int registerUser(UserDto user) {
+    public int insertUser(UserDto user) {
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -310,7 +310,7 @@ public class UserDao {
         return 1;
     }
 
-    // 가장 낮은 멤버십 등급 조회
+    // 기본 멤버십 등급 조회
     private int findDefaultMembershipId(Connection conn) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -354,3 +354,4 @@ public class UserDao {
         }
     }
 }
+

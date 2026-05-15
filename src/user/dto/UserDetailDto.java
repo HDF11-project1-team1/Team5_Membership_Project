@@ -18,3 +18,4 @@ public class UserDetailDto {
     private int visitDateCount;
     private int purchaseDateCount;
 }
+

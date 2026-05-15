@@ -50,7 +50,7 @@ public class DBConnection {
         return conn;
     }
 
-    // 자원해제
+    // ?먯썝?댁젣
     public static void close(Connection conn) {
         if(conn != null) {
             try {
@@ -91,3 +91,4 @@ public class DBConnection {
         }
     }
 }
+

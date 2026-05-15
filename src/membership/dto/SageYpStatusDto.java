@@ -12,3 +12,4 @@ public class SageYpStatusDto {
     private int sageYpStatusId;
     private String sageYpStatus;
 }
+

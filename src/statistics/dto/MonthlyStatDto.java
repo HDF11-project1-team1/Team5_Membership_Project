@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 
 /**
  * 월별 추이용 DTO
- * label  : 그룹명 (카테고리명, 성별 등)
+ * label  : 그룹명(카테고리명, 등급 등)
  * month  : 1 ~ 12
  * count  : 구매 건수
- * amount : 총 결제금액 (final_price 합산)
+ * amount : 총 결제금액(final_price 합산)
  */
 @Data
 @AllArgsConstructor
@@ -20,3 +20,4 @@ public class MonthlyStatDto {
     private long   count;
     private long   amount;
 }
+

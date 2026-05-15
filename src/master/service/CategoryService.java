@@ -26,11 +26,11 @@ public class CategoryService {
     }
 
     // ===== 카테고리 목록 조회 =====
-    public List<CategoryDto> findCategoryList() {
+    public List<CategoryDto> getCategoryList() {
         return categoryDao.selectAllCategories();
     }
 
-    public CategoryDto findCategoryDetail(int categoryId) {
+    public CategoryDto getCategoryDetail(int categoryId) {
         if (!isValidId(categoryId)) {
             return null;
         }
@@ -51,3 +51,4 @@ public class CategoryService {
     }
 
 }
+
