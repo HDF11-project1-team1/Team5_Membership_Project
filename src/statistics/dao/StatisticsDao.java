@@ -173,7 +173,7 @@ public class StatisticsDao {
     }
 
     public List<MonthlyStatDto> selectMonthlyBenefitTrend(int year) {
-        return executeMonthlyQuery("SELECT '혜택 사용', EXTRACT(MONTH FROM ph.generated_date), COUNT(*), SUM(ph.final_price) FROM purchase_history ph WHERE " + YEAR_FILTER + " GROUP BY EXTRACT(MONTH FROM ph.generated_date) ORDER BY 2", year);
+        return executeMonthlyQuery("SELECT '전체 구매', EXTRACT(MONTH FROM ph.generated_date), COUNT(*), SUM(ph.final_price) FROM purchase_history ph WHERE " + YEAR_FILTER + " GROUP BY EXTRACT(MONTH FROM ph.generated_date) ORDER BY 2", year);
     }
 
     public List<MonthlyStatDto> selectMonthlyVipTrend(int year) {

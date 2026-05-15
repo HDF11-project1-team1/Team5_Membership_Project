@@ -22,7 +22,7 @@ public class UserTotalInfoDto {
     private LocalDateTime cardPeriod;
     private boolean employeeYn;
 
-    // ?곸꽭?뺣낫
+    // 상세정보
     private int vipAmount;
     private int mileageAmount;
     private int totalRewardAmount;
