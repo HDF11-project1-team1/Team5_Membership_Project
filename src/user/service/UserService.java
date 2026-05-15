@@ -1,7 +1,6 @@
 package user.service;
 
 import membership.dto.MembershipDto;
-import membership.dto.MembershipHistoryDto;
 import user.dao.UserDao;
 import user.dto.UserDto;
 import user.dto.UserTotalInfoDto;
@@ -25,10 +24,6 @@ public class UserService {
         return userDao.findAllUsers();
     }
 
-    public List<UserTotalInfoDto> getAllUserDetails() {
-        return userDao.findAllUserDetails();
-    }
-
     public List<MembershipDto> getMemberships() {
         return userDao.findAllMemberships();
     }
@@ -46,11 +41,6 @@ public class UserService {
         }
 
         return userDao.findUserDetailByNameAndBirth(name, birth);
-    }
-
-    public UserTotalInfoDto getUserDetailByUserId(int userId) {
-        validatePositive(userId, "회원 ID");
-        return userDao.findUserDetailByUserId(userId);
     }
 
     public int registerUser(UserDto user) {

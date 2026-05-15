@@ -3,7 +3,6 @@ package user.dao;
 import common.connection.DBConnection;
 import common.connection.DBType;
 import membership.dto.MembershipDto;
-import membership.dto.MembershipHistoryDto;
 import user.dto.UserDto;
 import user.dto.UserTotalInfoDto;
 
@@ -50,38 +49,6 @@ public class UserDao {
     }
 
     // 2. 회원 상세 조회 (기본정보 + 상세정보)
-    public List<UserTotalInfoDto> findAllUserDetails() {
-
-        List<UserTotalInfoDto> userTotalInfoList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
-                    "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
-                    "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
-                    "from users u join user_detail d on u.user_id = d.user_id";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                userTotalInfoList.add(mapUserTotalInfo(rs));
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return userTotalInfoList;
-    }
-
     public UserTotalInfoDto findUserDetailByNameAndBirth(String name, LocalDate birth) {
 
         UserTotalInfoDto user = null;
@@ -118,40 +85,6 @@ public class UserDao {
     }
 
     // pre 3. 멤버십 종류 조회
-    public UserTotalInfoDto findUserDetailByUserId(int userId) {
-
-        UserTotalInfoDto user = null;
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
-                    "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
-                    "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
-                    "from users u join user_detail d on u.user_id = d.user_id " +
-                    "where u.user_id = ?";
-
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, userId);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                user = mapUserTotalInfo(rs);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return user;
-    }
-
     public List<MembershipDto> findAllMemberships() {
 
         List<MembershipDto> membershipList = new ArrayList<>();
@@ -255,11 +188,16 @@ public class UserDao {
             DBConnection.close(pstmt);
             pstmt = null;
 
+            LocalDateTime endDate = LocalDate.now()
+                            .withMonth(12)
+                            .withDayOfMonth(31)
+                            .atStartOfDay();
             String historySql = "insert into membership_history (membership_history_id, user_id, membership_id, start_date, end_date, calculated_amount) " +
-                    "values (seq_membership_history.nextval, ?, ?, sysdate, null, 0)";
+                    "values (seq_membership_history.nextval, ?, ?, sysdate, ?, 0)";
             pstmt = conn.prepareStatement(historySql);
             pstmt.setInt(1, user.getUserId());
             pstmt.setInt(2, user.getMembershipId());
+            setTimestamp(pstmt, 3, endDate);
             pstmt.executeUpdate();
 
             conn.commit();
@@ -372,6 +310,7 @@ public class UserDao {
         return 1;
     }
 
+    // 가장 낮은 멤버십 등급 조회
     private int findDefaultMembershipId(Connection conn) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
