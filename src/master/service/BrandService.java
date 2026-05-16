@@ -6,16 +6,20 @@ import common.exception.ValidationException;
 import master.dao.BrandDao;
 import master.dao.CategoryDao;
 import master.dto.BrandDto;
+import master.dto.request.BrandRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
 import static common.validation.InputValidator.hasText;
 import static common.validation.InputValidator.isValidId;
+import static common.validation.InputValidator.isValidMileageRate;
 
 public class BrandService {
 
     private final BrandDao brandDao = new BrandDao();
     private final CategoryDao categoryDao = new CategoryDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
     // ===== 브랜드 등록 =====
     public boolean registerBrand(String brandName, int categoryId) {

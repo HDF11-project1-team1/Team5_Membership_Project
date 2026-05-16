@@ -14,4 +14,3 @@ public class RewardPolicyDto {
     private int offerStandard;
     private int rewardAmount;
 }
-

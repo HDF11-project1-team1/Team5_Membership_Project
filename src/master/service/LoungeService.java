@@ -29,12 +29,12 @@ public class LoungeService {
     }
 
     // ===== 라운지 목록 조회 =====
-    public List<LoungeDto> getLoungeList() {
+    public List<LoungeDto> findLoungeList() {
         return loungeDao.selectAllLounges();
     }
 
     // ===== 라운지 상세 조회 =====
-    public LoungeDto getLoungeDetail(int loungeId) {
+    public LoungeDto findLoungeDetail(int loungeId) {
         if (!isValidId(loungeId)) {
             throw new ValidationException("라운지 ID는 1 이상이어야 합니다.");
         }

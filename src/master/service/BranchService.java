@@ -5,15 +5,21 @@ import common.exception.NotFoundException;
 import common.exception.ValidationException;
 import master.dao.BranchDao;
 import master.dto.BranchDto;
+import master.dto.request.BranchRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
 import static common.validation.InputValidator.hasText;
 import static common.validation.InputValidator.isValidId;
+import static common.validation.InputValidator.isValidMileageRate;
+import static common.validation.InputValidator.isValidRate;
+import static common.validation.InputValidator.isValidStandardRange;
 
 public class BranchService {
 
     private final BranchDao branchDao = new BranchDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
     // ===== 지점 등록 =====
     public boolean registerBranch(String branchName, String branchAddress) {
@@ -45,7 +51,6 @@ public class BranchService {
         return branch;
     }
 
-    // ===== 지점 정보 수정 =====
     public boolean updateBranch(int branchId, String branchName, String branchAddress) {
         if (!isValidId(branchId) || !hasText(branchName) || !hasText(branchAddress)) {
             throw new ValidationException("지점 ID, 지점명, 지점 주소는 필수입니다.");

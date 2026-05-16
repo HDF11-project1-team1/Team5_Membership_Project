@@ -10,8 +10,22 @@ public class PaymentDao {
     private final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     public int insertPayment(PaymentDto paymentDto) {
-        String sql = "INSERT INTO payment (payment_id, payment_type) VALUES (seq_payment.NEXTVAL, ?)";
-        return jdbcTemplate.update(sql, pstmt -> pstmt.setString(1, paymentDto.getPaymentType()));
+        return insertPaymentAndReturnId(paymentDto) > 0 ? 1 : 0;
+    }
+
+    public int insertPaymentAndReturnId(PaymentDto paymentDto) {
+        Integer paymentId = jdbcTemplate.queryForObject("SELECT seq_payment.NEXTVAL FROM dual", rs -> rs.getInt(1));
+        if (paymentId == null) {
+            return 0;
+        }
+
+        String sql = "INSERT INTO payment (payment_id, payment_type) VALUES (?, ?)";
+        int result = jdbcTemplate.update(sql, pstmt -> {
+            pstmt.setInt(1, paymentId);
+            pstmt.setString(2, paymentDto.getPaymentType());
+        });
+
+        return result > 0 ? paymentId : 0;
     }
 
     public List<PaymentDto> selectAllPayments() {
