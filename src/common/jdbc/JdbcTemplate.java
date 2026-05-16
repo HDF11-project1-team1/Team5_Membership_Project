@@ -2,6 +2,7 @@ package common.jdbc;
 
 import common.connection.DBConnection;
 import common.connection.DBType;
+import common.exception.DataAccessException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,20 +13,29 @@ import java.util.List;
 
 public class JdbcTemplate {
 
+    private final DBType dbType;
+
+    public JdbcTemplate() {
+        this(DBType.LOCALDB);
+    }
+
+    public JdbcTemplate(DBType dbType) {
+        this.dbType = dbType;
+    }
+
     public int update(String sql) {
         return update(sql, null);
     }
 
     public int update(String sql, PreparedStatementSetter setter) {
         try (
-                Connection conn = DBConnection.getConnection(DBType.LOCALDB);
+                Connection conn = DBConnection.getConnection(dbType);
                 PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             setParameters(pstmt, setter);
             return pstmt.executeUpdate();
         } catch (SQLException | NullPointerException e) {
-            System.out.println(e.getMessage());
-            return 0;
+            throw new DataAccessException("DB 수정 작업 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -37,7 +47,7 @@ public class JdbcTemplate {
         List<T> result = new ArrayList<>();
 
         try (
-                Connection conn = DBConnection.getConnection(DBType.LOCALDB);
+                Connection conn = DBConnection.getConnection(dbType);
                 PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             setParameters(pstmt, setter);
@@ -48,7 +58,7 @@ public class JdbcTemplate {
                 }
             }
         } catch (SQLException | NullPointerException e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("DB 조회 작업 중 오류가 발생했습니다.", e);
         }
 
         return result;
@@ -81,4 +91,3 @@ public class JdbcTemplate {
         }
     }
 }
-

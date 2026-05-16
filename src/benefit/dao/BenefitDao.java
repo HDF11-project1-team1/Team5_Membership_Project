@@ -8,6 +8,7 @@ import benefit.dto.VehicleDto;
 
 import common.connection.DBConnection;
 import common.connection.DBType;
+import common.jdbc.JdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +21,241 @@ import java.util.Collections;
 import java.util.List;
 
 public class BenefitDao {
+
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(DBType.ORACLE);
+
+    private UserInfoDto selectUserInfoByName(String name) {
+        String sql = "SELECT u.user_id, u.membership_id, m.membership_grade " +
+                "FROM users u " +
+                "JOIN membership m ON u.membership_id = m.membership_id " +
+                "WHERE u.name = ?";
+
+        return jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setString(1, name),
+                rs -> {
+                    UserInfoDto dto = new UserInfoDto();
+                    dto.setUserId(rs.getInt("user_id"));
+                    dto.setMembershipId(rs.getInt("membership_id"));
+                    dto.setMembershipGrade(rs.getString("membership_grade"));
+                    return dto;
+                });
+    }
+
+    private boolean selectLoungePolicyAvailable(String membershipGrade, String branchName, String loungeName) {
+        String sql = "SELECT lp.lounge_available " +
+                "FROM lounge_policy lp " +
+                "JOIN membership m ON lp.membership_id = m.membership_id " +
+                "JOIN branch b ON lp.branch_id = b.branch_id " +
+                "JOIN lounge l ON lp.lounge_id = l.lounge_id " +
+                "WHERE m.membership_grade = ? " +
+                "  AND b.branch_name = ? " +
+                "  AND l.lounge_name = ?";
+
+        Integer available = jdbcTemplate.queryForObject(sql,
+                pstmt -> {
+                    pstmt.setString(1, membershipGrade);
+                    pstmt.setString(2, branchName);
+                    pstmt.setString(3, loungeName);
+                },
+                rs -> rs.getInt("lounge_available"));
+        return available != null && available > 0;
+    }
+
+    private int selectLoungeIdByName(String loungeName) {
+        String sql = "SELECT lounge_id FROM lounge WHERE lounge_name = ?";
+
+        Integer loungeId = jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setString(1, loungeName),
+                rs -> rs.getInt("lounge_id"));
+        return loungeId == null ? -1 : loungeId;
+    }
+
+    private boolean existsLoungeHistoryToday(int userId, int loungeId) {
+        String sql = "SELECT COUNT(*) FROM lounge_history " +
+                "WHERE user_id = ? AND lounge_id = ? AND TRUNC(entry_date) = TRUNC(SYSDATE)";
+
+        return jdbcTemplate.exists(sql,
+                pstmt -> {
+                    pstmt.setInt(1, userId);
+                    pstmt.setInt(2, loungeId);
+                });
+    }
+
+    private int selectCafeHPolicyCountByGrade(String membershipGrade) {
+        String sql = "SELECT coffee_count FROM membership WHERE membership_grade = ?";
+
+        Integer count = jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setString(1, membershipGrade),
+                rs -> rs.getInt("coffee_count"));
+        return count == null ? 0 : count;
+    }
+
+    private UserInfoDto selectUserAndVehicleInfo(String name, String carNumber) {
+        String sql = "SELECT v.vehicle_id, u.user_id, u.membership_id, m.membership_grade " +
+                "FROM vehicle v " +
+                "JOIN users u ON v.user_id = u.user_id " +
+                "JOIN membership m ON u.membership_id = m.membership_id " +
+                "WHERE u.name = ? AND v.car_number = ?";
+
+        return jdbcTemplate.queryForObject(sql,
+                pstmt -> {
+                    pstmt.setString(1, name);
+                    pstmt.setString(2, carNumber);
+                },
+                rs -> {
+                    UserInfoDto dto = new UserInfoDto();
+                    dto.setVehicleId(rs.getInt("vehicle_id"));
+                    dto.setUserId(rs.getInt("user_id"));
+                    dto.setMembershipId(rs.getInt("membership_id"));
+                    dto.setMembershipGrade(rs.getString("membership_grade"));
+                    return dto;
+                });
+    }
+
+    private boolean selectFreeParkingPolicy(int membershipId, String branchName) {
+        String sql = "SELECT fp.free_parking_available " +
+                "FROM free_parking_policy fp " +
+                "JOIN branch b ON fp.branch_id = b.branch_id " +
+                "WHERE fp.membership_id = ? AND b.branch_name = ?";
+
+        Integer available = jdbcTemplate.queryForObject(sql,
+                pstmt -> {
+                    pstmt.setInt(1, membershipId);
+                    pstmt.setString(2, branchName);
+                },
+                rs -> rs.getInt("free_parking_available"));
+        return available != null && available > 0;
+    }
+
+    private boolean existsGreenBranchByBranchName(int userId, String branchName) {
+        String sql = "SELECT COUNT(*) " +
+                "FROM green_vehicle_branch gvb " +
+                "JOIN branch b ON gvb.branch_id = b.branch_id " +
+                "WHERE gvb.user_id = ? AND b.branch_name = ?";
+
+        return jdbcTemplate.exists(sql,
+                pstmt -> {
+                    pstmt.setInt(1, userId);
+                    pstmt.setString(2, branchName);
+                });
+    }
+
+    private ParkingHistoryDto selectTodayParkingHistory(int vehicleId) {
+        String sql = "SELECT ph.entry_date, ph.exit_date " +
+                "FROM parking_history ph " +
+                "WHERE ph.vehicle_id = ? " +
+                "  AND TRUNC(ph.entry_date) = TRUNC(SYSDATE) " +
+                "ORDER BY ph.entry_date DESC";
+
+        return jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setInt(1, vehicleId),
+                rs -> {
+                    ParkingHistoryDto dto = new ParkingHistoryDto();
+                    Timestamp entry = rs.getTimestamp("entry_date");
+                    Timestamp exit = rs.getTimestamp("exit_date");
+                    if (entry != null) {
+                        dto.setEntryDate(entry.toLocalDateTime());
+                    }
+                    if (exit != null) {
+                        dto.setExitDate(exit.toLocalDateTime());
+                    }
+                    return dto;
+                });
+    }
+
+    private int selectLastYearCalculatedAmount(int userId) {
+        String sql = "SELECT mh.calculated_amount " +
+                "FROM membership_history mh " +
+                "WHERE mh.user_id = ? " +
+                "  AND EXTRACT(YEAR FROM mh.start_date) = EXTRACT(YEAR FROM SYSDATE) - 1";
+
+        Integer amount = jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setInt(1, userId),
+                rs -> {
+                    int value = rs.getInt("calculated_amount");
+                    return rs.wasNull() ? -1 : value;
+                });
+        return amount == null ? -1 : amount;
+    }
+
+    private boolean existsValetPolicyAvailable(int membershipId, String branchName, int calculatedAmount) {
+        String sql = "SELECT vp.valet_available " +
+                "FROM valet_policy vp " +
+                "JOIN branch b ON vp.branch_id = b.branch_id " +
+                "WHERE vp.membership_id = ? " +
+                "  AND b.branch_name = ? " +
+                "  AND ? >= NVL(vp.last_year_vip_min_standard, 0) " +
+                "  AND ? <= NVL(vp.last_year_vip_max_standard, 999999999)";
+
+        Integer available = jdbcTemplate.queryForObject(sql,
+                pstmt -> {
+                    pstmt.setInt(1, membershipId);
+                    pstmt.setString(2, branchName);
+                    pstmt.setInt(3, calculatedAmount);
+                    pstmt.setInt(4, calculatedAmount);
+                },
+                rs -> rs.getInt("valet_available"));
+        return available != null && available > 0;
+    }
+
+    private int selectVehicleIdByCarNumber(int userId, String carNumber) {
+        String sql = "SELECT v.vehicle_id FROM vehicle v WHERE v.user_id = ? AND v.car_number = ?";
+
+        Integer vehicleId = jdbcTemplate.queryForObject(sql,
+                pstmt -> {
+                    pstmt.setInt(1, userId);
+                    pstmt.setString(2, carNumber);
+                },
+                rs -> rs.getInt("vehicle_id"));
+        return vehicleId == null ? -1 : vehicleId;
+    }
+
+    private boolean existsValetHistoryToday(int vehicleId) {
+        String sql = "SELECT COUNT(*) " +
+                "FROM parking_history ph " +
+                "WHERE ph.vehicle_id = ? " +
+                "  AND TRUNC(ph.entry_date) = TRUNC(SYSDATE) " +
+                "  AND ph.valet_use_yn = 1";
+
+        return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, vehicleId));
+    }
+
+    private int selectSpecialDiscountBalanceByName(String name) {
+        String sql = "SELECT ud.remain_special_discount_amount " +
+                "FROM user_detail ud " +
+                "JOIN users u ON ud.user_id = u.user_id " +
+                "WHERE u.name = ?";
+
+        Integer amount = jdbcTemplate.queryForObject(sql,
+                pstmt -> pstmt.setString(1, name),
+                rs -> {
+                    int value = rs.getInt("remain_special_discount_amount");
+                    return rs.wasNull() ? 0 : value;
+                });
+        return amount == null ? -1 : amount;
+    }
+
+    private List<RewardHistoryDto> selectRewardHistoryByName(String name) {
+        String sql = "SELECT rh.reward_history_id, rh.user_id, rh.reward_amount, rh.offer_date " +
+                "FROM reward_history rh " +
+                "JOIN users u ON rh.user_id = u.user_id " +
+                "WHERE u.name = ? " +
+                "ORDER BY rh.offer_date DESC";
+
+        return jdbcTemplate.query(sql,
+                pstmt -> pstmt.setString(1, name),
+                rs -> {
+                    RewardHistoryDto dto = new RewardHistoryDto();
+                    dto.setRewardHistoryId(rs.getInt("reward_history_id"));
+                    dto.setUserId(rs.getInt("user_id"));
+                    dto.setRewardAmount(rs.getInt("reward_amount"));
+                    java.sql.Date offerDate = rs.getDate("offer_date");
+                    if (offerDate != null) {
+                        dto.setOfferDate(offerDate.toLocalDate());
+                    }
+                    return dto;
+                });
+    }
 
     // 멤버십 등급, 지점명, 라운지명으로 라운지 이용 가능 여부를 조회한다.
     public boolean selectLoungePolicyAvailable(Connection conn, String membershipGrade, String branchName,
@@ -530,24 +766,22 @@ public class BenefitDao {
 
     // 회원명, 지점명, 라운지명으로 라운지 이용 가능 여부를 조회한다.
     public boolean selectLoungePolicyAvailability(String name, String branchName, String loungeName) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            UserInfoDto userInfo = selectUserInfoByName(name);
             if (userInfo == null) {
                 System.out.println("[라운지] 회원을 찾을 수 없습니다.");
                 return false;
             }
 
             // 1. 라운지 정책 이용 가능 여부 우선 확인
-            boolean isPolicyAvailable = selectLoungePolicyAvailable(conn, userInfo.getMembershipGrade(), branchName, loungeName);
+            boolean isPolicyAvailable = selectLoungePolicyAvailable(userInfo.getMembershipGrade(), branchName, loungeName);
             if (!isPolicyAvailable) {
                 return false;
             }
 
             // 2. 당일 이용 이력 체크 (특정 라운지 기준)
-            int loungeId = selectLoungeIdByName(conn, loungeName);
-            if (loungeId != -1 && existsLoungeHistoryToday(conn, userInfo.getUserId(), loungeId)) {
+            int loungeId = selectLoungeIdByName(loungeName);
+            if (loungeId != -1 && existsLoungeHistoryToday(userInfo.getUserId(), loungeId)) {
                 System.out.println("[라운지] 오늘 이미 " + loungeName + "을(를) 이용하셨습니다.");
                 return false;
             }
@@ -556,22 +790,16 @@ public class BenefitDao {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
-        } finally {
-            DBConnection.close(conn);
         }
     }
 
     // Cafe-H 무료 커피 제공 개수 조회 기능을 수행한다.
     public int selectCafeHPolicyCount(String membershipGrade) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            return selectCafeHPolicyCount(conn, membershipGrade);
+            return selectCafeHPolicyCountByGrade(membershipGrade);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return 0;
-        } finally {
-            DBConnection.close(conn);
         }
     }
 
@@ -664,28 +892,25 @@ public class BenefitDao {
 
     // 무료주차 이용 가능 여부를 조회한다.
     public String selectFreeParkingAvailability(String branchName, String name, String carNumber) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-
-            UserInfoDto userInfo = selectUserAndVehicleInfo(conn, name, carNumber);
+            UserInfoDto userInfo = selectUserAndVehicleInfo(name, carNumber);
             if (userInfo == null) {
                 return "[무료주차] 회원 또는 등록 차량을 찾을 수 없습니다.";
             }
 
-            boolean hasPolicy = selectFreeParkingPolicy(conn, userInfo.getMembershipId(), branchName);
+            boolean hasPolicy = selectFreeParkingPolicy(userInfo.getMembershipId(), branchName);
             if (!hasPolicy) {
                 return "[무료주차] 해당 지점/등급의 무료주차 정책이 없습니다.";
             }
 
             String grade = userInfo.getMembershipGrade();
             if (grade.equalsIgnoreCase("GREEN 2") || grade.equalsIgnoreCase("EARLY GREEN")) {
-                if (!existsGreenBranchByBranchName(conn, userInfo.getUserId(), branchName)) {
+                if (!existsGreenBranchByBranchName(userInfo.getUserId(), branchName)) {
                     return "[무료주차] GREEN 등급은 등록 지점에서만 이용 가능합니다.";
                 }
             }
 
-            ParkingHistoryDto todayHistory = selectTodayParkingHistory(conn, userInfo.getVehicleId());
+            ParkingHistoryDto todayHistory = selectTodayParkingHistory(userInfo.getVehicleId());
             if (todayHistory != null) {
                 if (todayHistory.getExitDate() == null) {
                     long minutes = ChronoUnit.MINUTES.between(todayHistory.getEntryDate(), LocalDateTime.now());
@@ -697,60 +922,49 @@ public class BenefitDao {
             return "[무료주차] 무료주차 가능";
         } catch (Exception e) {
             return "[무료주차] 오류 발생: " + e.getMessage();
-        } finally {
-            DBConnection.close(conn);
         }
     }
 
     // 발레파킹 이용 가능 여부를 조회한다.
     public String selectValetParkingAvailability(String branchName, String name, String carNumber) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-
-            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            UserInfoDto userInfo = selectUserInfoByName(name);
             if (userInfo == null) {
                 return "[발레파킹] 회원을 찾을 수 없습니다.";
             }
 
-            int calculatedAmount = selectLastYearCalculatedAmount(conn, userInfo.getUserId());
+            int calculatedAmount = selectLastYearCalculatedAmount(userInfo.getUserId());
             if (calculatedAmount == -1) {
                 return "[발레파킹] 전년도 산정금액 이력이 없습니다.";
             }
 
-            boolean policyOk = existsValetPolicyAvailable(conn, userInfo.getMembershipId(), branchName, calculatedAmount);
+            boolean policyOk = existsValetPolicyAvailable(userInfo.getMembershipId(), branchName, calculatedAmount);
             if (!policyOk) {
                 return "[발레파킹] 정책 조건에 맞지 않습니다.";
             }
 
-            int vehicleId = selectVehicleIdByCarNumber(conn, userInfo.getUserId(), carNumber);
+            int vehicleId = selectVehicleIdByCarNumber(userInfo.getUserId(), carNumber);
             if (vehicleId == -1) {
                 return "[발레파킹] 등록 차량을 찾을 수 없습니다.";
             }
 
-            if (existsValetHistoryToday(conn, vehicleId)) {
+            if (existsValetHistoryToday(vehicleId)) {
                 return "[발레파킹] 오늘 이미 사용했습니다.";
             }
 
             return "[발레파킹] 발레파킹 가능";
         } catch (Exception e) {
             return "[발레파킹] 오류 발생: " + e.getMessage();
-        } finally {
-            DBConnection.close(conn);
         }
     }
 
     // 회원명으로 특별할인 잔액 조회 기능을 수행한다.
     public int selectSpecialDiscountBalance(String name) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            return selectSpecialDiscountBalance(conn, name);
+            return selectSpecialDiscountBalanceByName(name);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return -1;
-        } finally {
-            DBConnection.close(conn);
         }
     }
 
@@ -800,15 +1014,11 @@ public class BenefitDao {
 
     // 회원명으로 리워드 이력 조회 기능을 수행한다.
     public List<RewardHistoryDto> selectRewardHistory(String name) {
-        Connection conn = null;
         try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            return selectRewardHistoryByName(conn, name);
+            return selectRewardHistoryByName(name);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return Collections.emptyList();
-        } finally {
-            DBConnection.close(conn);
         }
     }
 

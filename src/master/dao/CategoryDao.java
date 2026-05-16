@@ -10,8 +10,22 @@ public class CategoryDao {
     private final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     public int insertCategory(CategoryDto categoryDto) {
-        String sql = "INSERT INTO category (category_id, category_name) VALUES (seq_category.NEXTVAL, ?)";
-        return jdbcTemplate.update(sql, pstmt -> pstmt.setString(1, categoryDto.getCategoryName()));
+        return insertCategoryAndReturnId(categoryDto) > 0 ? 1 : 0;
+    }
+
+    public int insertCategoryAndReturnId(CategoryDto categoryDto) {
+        Integer categoryId = jdbcTemplate.queryForObject("SELECT seq_category.NEXTVAL FROM dual", rs -> rs.getInt(1));
+        if (categoryId == null) {
+            return 0;
+        }
+
+        String sql = "INSERT INTO category (category_id, category_name) VALUES (?, ?)";
+        int result = jdbcTemplate.update(sql, pstmt -> {
+            pstmt.setInt(1, categoryId);
+            pstmt.setString(2, categoryDto.getCategoryName());
+        });
+
+        return result > 0 ? categoryId : 0;
     }
 
     public List<CategoryDto> selectAllCategories() {

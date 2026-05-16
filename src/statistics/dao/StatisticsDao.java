@@ -1,93 +1,38 @@
 package statistics.dao;
 
-import common.connection.DBConnection;
 import common.connection.DBType;
+import common.jdbc.JdbcTemplate;
 import statistics.dto.MonthlyStatDto;
 import statistics.dto.StatDto;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class StatisticsDao {
 
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(DBType.ORACLE);
+
     // 공통 월별 통계 쿼리를 실행한다. 파라미터는 year, month 순서로 바인딩한다.
     private List<StatDto> executeQuery(String sql, int year, int month) {
-        List<StatDto> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
+        return jdbcTemplate.query(sql, pstmt -> {
             pstmt.setInt(1, year);
             pstmt.setInt(2, month);
-            rs = pstmt.executeQuery();
-            while (rs.next()) {
-                list.add(new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
-            }
-        } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeQuery: " + e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        }, rs -> new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
     }
 
     // 혜택 사용률 쿼리를 실행한다. UNION ALL 4개 쿼리라 year/month를 네 번 바인딩한다.
     private List<StatDto> executeBenefitQuery(String sql, int year, int month) {
-        List<StatDto> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
+        return jdbcTemplate.query(sql, pstmt -> {
             for (int i = 1; i <= 8; i += 2) {
                 pstmt.setInt(i, year);
                 pstmt.setInt(i + 1, month);
             }
-            rs = pstmt.executeQuery();
-            while (rs.next()) {
-                list.add(new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
-            }
-        } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeBenefitQuery: " + e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        }, rs -> new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
     }
 
     // 월별 추이 쿼리를 실행한다. year만 바인딩하고 월 기준으로 그룹화한다.
     private List<MonthlyStatDto> executeMonthlyQuery(String sql, int year) {
-        List<MonthlyStatDto> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, year);
-            rs = pstmt.executeQuery();
-            while (rs.next()) {
-                list.add(new MonthlyStatDto(rs.getString(1), rs.getInt(2), rs.getLong(3), rs.getLong(4)));
-            }
-        } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeMonthlyQuery: " + e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        return jdbcTemplate.query(sql, pstmt -> pstmt.setInt(1, year),
+                rs -> new MonthlyStatDto(rs.getString(1), rs.getInt(2), rs.getLong(3), rs.getLong(4)));
     }
 
     // 월간 통계 조회용 공통 필터
