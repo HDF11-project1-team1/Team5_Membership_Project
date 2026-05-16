@@ -116,40 +116,7 @@ public class UserPanel extends JPanel {
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        userTable = new JTable(tableModel);
-        userTable.setFont(UIConstants.BODY_FONT);
-        userTable.setRowHeight(55); // 행 높이 상향
-        userTable.setShowVerticalLines(false);
-        userTable.setGridColor(UIConstants.LINE_COLOR);
-        userTable.setSelectionBackground(new Color(0xF2F4F6));
-        userTable.setSelectionForeground(UIConstants.TEXT_MAIN);
-        
-        // 셀 내부 패딩(여백) 설정을 위한 커스텀 렌더러
-        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20)); // 좌우 패딩 20px
-                return label;
-            }
-        };
-        userTable.setDefaultRenderer(Object.class, cellRenderer);
-
-        userTable.getTableHeader().setFont(UIConstants.BODY_BOLD_FONT);
-        userTable.getTableHeader().setBackground(Color.WHITE);
-        userTable.getTableHeader().setPreferredSize(new Dimension(0, 50)); // 헤더 높이도 상향
-        
-        // 헤더 패딩 설정
-        userTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-                label.setBackground(Color.WHITE);
-                label.setFont(UIConstants.BODY_BOLD_FONT);
-                return label;
-            }
-        });
+        userTable = new ui.components.StyledTable(tableModel);
         
         // 선택 이벤트 리스너
         userTable.getSelectionModel().addListSelectionListener(e -> {
@@ -243,6 +210,7 @@ public class UserPanel extends JPanel {
         scrollForm.setBorder(BorderFactory.createEmptyBorder());
         scrollForm.setOpaque(false);
         scrollForm.getViewport().setOpaque(false);
+        scrollForm.getVerticalScrollBar().setUnitIncrement(20); // 스크롤 속도 상향
         detailContainer.add(scrollForm, BorderLayout.CENTER);
 
         JPanel btnPanel = new JPanel(new GridLayout(1, 1, 10, 0));

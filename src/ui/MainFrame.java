@@ -5,6 +5,9 @@ import java.awt.*;
 import ui.panels.HomePanel;
 import ui.panels.user.UserPanel;
 import ui.panels.policy.PolicyPanel;
+import ui.panels.purchase.PurchasePanel;
+import ui.panels.vip.VipPanel;
+import ui.panels.benefit.BenefitPanel;
 
 public class MainFrame extends JFrame {
     private JPanel cardPanel;
@@ -30,6 +33,9 @@ public class MainFrame extends JFrame {
         cardPanel.add(new HomePanel(this), "HOME");
         cardPanel.add(new UserPanel(this), "USER");
         cardPanel.add(new PolicyPanel(this), "POLICY");
+        cardPanel.add(new PurchasePanel(this), "PURCHASE");
+        cardPanel.add(new VipPanel(this), "VIP");
+        cardPanel.add(new BenefitPanel(this), "BENEFIT");
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -53,10 +59,18 @@ public class MainFrame extends JFrame {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
         navPanel.add(titleLabel);
 
-        // 홈으로 가기 메뉴 버튼
-        JButton homeBtn = createNavButton("🏠 메인 메뉴");
-        homeBtn.addActionListener(e -> switchPanel("HOME"));
-        navPanel.add(homeBtn);
+        // 메뉴 버튼들
+        navPanel.add(createNavButton("🏠 메인 홈", "HOME"));
+        navPanel.add(Box.createVerticalStrut(10));
+        navPanel.add(createNavButton("👥 회원 관리", "USER"));
+        navPanel.add(Box.createVerticalStrut(5));
+        navPanel.add(createNavButton("💰 구매 관리", "PURCHASE"));
+        navPanel.add(Box.createVerticalStrut(5));
+        navPanel.add(createNavButton("👑 VIP 멤버십 관리", "VIP"));
+        navPanel.add(Box.createVerticalStrut(5));
+        navPanel.add(createNavButton("🎁 혜택 이용 관리", "BENEFIT"));
+        navPanel.add(Box.createVerticalStrut(5));
+        navPanel.add(createNavButton("⚙️ 정책 관리", "POLICY"));
 
         // 하단 빈 공간 채우기
         navPanel.add(Box.createVerticalGlue());
@@ -65,7 +79,7 @@ public class MainFrame extends JFrame {
     }
 
     // 네비게이션 바용 투명 버튼 생성기
-    private JButton createNavButton(String text) {
+    private JButton createNavButton(String text, String panelName) {
         JButton btn = new JButton(text);
         btn.setFont(UIConstants.BODY_BOLD_FONT);
         btn.setForeground(UIConstants.TEXT_MAIN);
@@ -78,6 +92,8 @@ public class MainFrame extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // 좌우 패딩 넉넉하게
         
+        btn.addActionListener(e -> switchPanel(panelName));
+
         // 마우스 호버 시 약간 회색빛으로 변하는 효과
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {

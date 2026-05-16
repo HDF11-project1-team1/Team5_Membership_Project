@@ -10,6 +10,7 @@ import java.awt.geom.RoundRectangle2D;
 public class RoundedTextField extends JTextField {
     private int radius = 10;
     private Color borderColor = UIConstants.LINE_COLOR;
+    private String placeholder;
 
     public RoundedTextField(int columns) {
         super(columns);
@@ -34,6 +35,10 @@ public class RoundedTextField extends JTextField {
         });
     }
 
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
@@ -43,7 +48,17 @@ public class RoundedTextField extends JTextField {
         g2.setColor(getBackground());
         g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
         
-        super.paintComponent(g);
+        super.paintComponent(g2); // g2를 넘겨야 렌더링 힌트가 적용됨
+
+        // Placeholder 그리기
+        if (placeholder != null && !placeholder.isEmpty() && getText().isEmpty()) {
+            g2.setColor(UIConstants.TEXT_SECONDARY);
+            g2.setFont(getFont());
+            FontMetrics fm = g2.getFontMetrics();
+            int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+            g2.drawString(placeholder, getInsets().left, y);
+        }
+
         g2.dispose();
     }
 

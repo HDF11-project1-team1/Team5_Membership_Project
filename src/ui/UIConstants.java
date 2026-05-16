@@ -50,15 +50,30 @@ public class UIConstants {
             ge.registerFont(pretendardRegular);
             ge.registerFont(pretendardBold);
 
+            applyGlobalFont(BODY_FONT);
+
         } catch (Exception e) {
             System.err.println("Pretendard 폰트 로드 실패. 시스템 기본 폰트를 사용합니다.");
-            e.printStackTrace();
+            // e.printStackTrace();
             // 기본 폰트 폴백
             HEADER_FONT = new Font("SansSerif", Font.BOLD, 24);
             SUBHEADER_FONT = new Font("SansSerif", Font.BOLD, 18);
             BODY_FONT = new Font("SansSerif", Font.PLAIN, 14);
             BODY_BOLD_FONT = new Font("SansSerif", Font.BOLD, 14);
             CAPTION_FONT = new Font("SansSerif", Font.PLAIN, 12);
+            
+            applyGlobalFont(BODY_FONT);
+        }
+    }
+
+    private static void applyGlobalFont(Font font) {
+        java.util.Enumeration<Object> keys = javax.swing.UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = javax.swing.UIManager.get(key);
+            if (value instanceof javax.swing.plaf.FontUIResource) {
+                javax.swing.UIManager.put(key, new javax.swing.plaf.FontUIResource(font));
+            }
         }
     }
 }
