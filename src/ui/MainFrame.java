@@ -14,17 +14,18 @@ public class MainFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel navPanel;
     private JLabel titleLabel;
-    
+
     // 각 패널 참조
     private UserPanel userPanel;
     private PurchasePanel purchasePanel;
     private VipPanel vipPanel;
     private BenefitPanel benefitPanel;
     private PolicyPanel policyPanel;
+    private ui.panels.stat.StatPanel statPanel;
 
     public MainFrame() {
         setTitle("현대백화점 VIP 멤버십 관리 프로그램");
-        setSize(1200, 800);
+        setSize(1500, 950);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -35,6 +36,7 @@ public class MainFrame extends JFrame {
         vipPanel = new VipPanel(this);
         benefitPanel = new BenefitPanel(this);
         policyPanel = new PolicyPanel(this);
+        statPanel = new ui.panels.stat.StatPanel();
 
         // 1. 네비게이션 바 (좌측)
         navPanel = createNavPanel();
@@ -51,6 +53,7 @@ public class MainFrame extends JFrame {
         cardPanel.add(vipPanel, "VIP");
         cardPanel.add(benefitPanel, "BENEFIT");
         cardPanel.add(policyPanel, "POLICY");
+        cardPanel.add(statPanel, "STAT");
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -86,6 +89,8 @@ public class MainFrame extends JFrame {
         panel.add(createNavButton("🎁 혜택 이용 관리", "BENEFIT", null));
         panel.add(Box.createVerticalStrut(5));
         panel.add(createNavButton("⚙️ 정책 관리", "POLICY", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("📊 통계 및 분석", "STAT", null));
 
         panel.add(Box.createVerticalGlue());
         return panel;
@@ -93,7 +98,7 @@ public class MainFrame extends JFrame {
 
     private JButton createNavButton(String text, String panelName, String iconFile) {
         JButton btn = new JButton(text);
-        
+
         if (iconFile != null) {
             try {
                 String path = "src/ui/icon/" + iconFile;
@@ -115,18 +120,19 @@ public class MainFrame extends JFrame {
         btn.setMaximumSize(new Dimension(220, 50));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 20));
-        
+
         btn.addActionListener(e -> switchPanel(panelName));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setForeground(UIConstants.PRIMARY_COLOR);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btn.setForeground(UIConstants.TEXT_MAIN);
             }
         });
-        
+
         return btn;
     }
 

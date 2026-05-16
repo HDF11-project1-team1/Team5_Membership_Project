@@ -61,6 +61,7 @@ public class PolicyPanel extends JPanel {
         RoundedTextField rateField = addLabeledField(panel, "마일리지 적립률 (0.01 ~ 1.0)");
 
         RoundedButton updateBtn = new RoundedButton("마일리지 정책 반영", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        updateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         updateBtn.addActionListener(e -> {
             try {
                 List<Integer> bIds = parseIds(branchIdsField.getText());
@@ -87,6 +88,7 @@ public class PolicyPanel extends JPanel {
         RoundedTextField rateField = addLabeledField(panel, "VIP 산정률 (0.01 ~ 1.0)");
 
         RoundedButton updateBtn = new RoundedButton("VIP 산정 정책 반영", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        updateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         updateBtn.addActionListener(e -> {
             try {
                 List<Integer> bIds = parseIds(branchIdsField.getText());
@@ -115,10 +117,12 @@ public class PolicyPanel extends JPanel {
         JCheckBox availableCheck = new JCheckBox("발레파킹 이용 가능 여부");
         availableCheck.setBackground(Color.WHITE);
         availableCheck.setSelected(true);
+        availableCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(availableCheck);
         panel.add(Box.createVerticalStrut(20));
 
         RoundedButton updateBtn = new RoundedButton("발레 정책 반영", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        updateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         updateBtn.addActionListener(e -> {
             try {
                 List<Integer> bIds = parseIds(branchIdsField.getText());
@@ -147,10 +151,12 @@ public class PolicyPanel extends JPanel {
         JCheckBox availableCheck = new JCheckBox("무료주차 이용 가능 여부");
         availableCheck.setBackground(Color.WHITE);
         availableCheck.setSelected(true);
+        availableCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(availableCheck);
         panel.add(Box.createVerticalStrut(20));
 
         RoundedButton updateBtn = new RoundedButton("무료주차 정책 반영", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        updateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         updateBtn.addActionListener(e -> {
             try {
                 List<Integer> bIds = parseIds(branchIdsField.getText());
@@ -178,10 +184,12 @@ public class PolicyPanel extends JPanel {
         JCheckBox availableCheck = new JCheckBox("라운지 이용 가능 여부");
         availableCheck.setBackground(Color.WHITE);
         availableCheck.setSelected(true);
+        availableCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(availableCheck);
         panel.add(Box.createVerticalStrut(20));
 
         RoundedButton updateBtn = new RoundedButton("라운지 정책 반영", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        updateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         updateBtn.addActionListener(e -> {
             try {
                 List<Integer> bIds = parseIds(branchIdsField.getText());
@@ -212,17 +220,20 @@ public class PolicyPanel extends JPanel {
         label.setFont(UIConstants.CAPTION_FONT);
         label.setForeground(UIConstants.TEXT_SECONDARY);
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }
 
     private RoundedTextField addLabeledField(JPanel parent, String labelText) {
         JLabel label = new JLabel(labelText);
         label.setFont(UIConstants.BODY_BOLD_FONT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         parent.add(label);
         parent.add(Box.createVerticalStrut(5));
         
         RoundedTextField field = new RoundedTextField(20);
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        field.setAlignmentX(Component.LEFT_ALIGNMENT);
         parent.add(field);
         parent.add(Box.createVerticalStrut(15));
         return field;
