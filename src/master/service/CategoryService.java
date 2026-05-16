@@ -29,7 +29,7 @@ public class CategoryService {
     }
 
     // ===== 카테고리 목록 조회 =====
-    public List<CategoryDto> getCategoryList() {
+    public List<CategoryDto> findCategoryList() {
         return categoryDao.selectAllCategories();
     }
 
