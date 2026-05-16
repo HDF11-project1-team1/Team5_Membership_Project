@@ -1,5 +1,7 @@
 package common.connection;
 
+import common.exception.DataAccessException;
+
 import java.sql.*;
 
 public class DBConnection {
@@ -21,7 +23,7 @@ public class DBConnection {
                     break;
             }
         } catch (Exception e) {
-            System.out.println("connection Factory : " + e.getMessage());
+            throw new DataAccessException("DB 연결 생성 중 오류가 발생했습니다.", e);
         }
 
         return conn;
@@ -44,13 +46,12 @@ public class DBConnection {
                     break;
             }
         } catch (Exception e) {
-            System.out.println("connection Factory : " + e.getMessage());
+            throw new DataAccessException("DB 연결 생성 중 오류가 발생했습니다.", e);
         }
 
         return conn;
     }
-
-    // 자원해제
+    // DB 자원 정리
     public static void close(Connection conn) {
         if(conn != null) {
             try {
@@ -91,3 +92,4 @@ public class DBConnection {
         }
     }
 }
+

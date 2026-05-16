@@ -13,3 +13,4 @@ public class BranchDto {
     private String branchName;
     private String branchAddress;
 }
+

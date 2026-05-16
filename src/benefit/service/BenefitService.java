@@ -1,32 +1,48 @@
 package benefit.service;
 
 import benefit.dao.BenefitDao;
-import benefit.dto.CoffeeHistoryDto;
-import benefit.dto.LoungeHistoryDto;
-import benefit.dto.ParkingHistoryDto;
-import benefit.dto.VehicleDto;
+import benefit.dto.RewardHistoryDto;
+
+import java.util.List;
 
 public class BenefitService {
 
     private final BenefitDao benefitDao = new BenefitDao();
 
-    // // 차량 등록 서비스
-    // public void registerVehicle(VehicleDto vehicle) {
-    // benefitDao.insertVehicle(vehicle);
-    // }
-
-    // 주차 이용 기록 조회 서비스
-    public void findParkingHistory(ParkingHistoryDto history) {
-        // 내부에 필요한 로직 구현 (예: DAO 호출)
+    public boolean getLoungePolicyAvailability(String name, String branchName, String loungeName) {
+        return benefitDao.selectLoungePolicyAvailability(name, branchName, loungeName);
     }
 
-    // // 라운지 이용 서비스
-    // public void useLounge(LoungeHistoryDto history) {
-    // benefitDao.insertLoungeHistory(history);
-    // }
+    public int getCafeHPolicyCount(String membershipGrade) {
+        return benefitDao.selectCafeHPolicyCount(membershipGrade);
+    }
 
-    // // 커피 쿠폰 사용 서비스
-    // public void useCoffeeCoupon(CoffeeHistoryDto history) {
-    // benefitDao.insertCoffeeHistory(history);
-    // }
+    public String registerVehicle(String name, String carNumber) {
+        return benefitDao.insertVehicleByUserName(name, carNumber);
+    }
+
+    public String updateVehicle(String name, String oldCarNumber, String newCarNumber) {
+        return benefitDao.updateVehicleByUserName(name, oldCarNumber, newCarNumber);
+    }
+
+    public String getFreeParkingAvailability(String branchName, String name, String carNumber) {
+        return benefitDao.selectFreeParkingAvailability(branchName, name, carNumber);
+    }
+
+    public String getValetParkingAvailability(String branchName, String name, String carNumber) {
+        return benefitDao.selectValetParkingAvailability(branchName, name, carNumber);
+    }
+
+    public int getSpecialDiscountBalance(String name) {
+        return benefitDao.selectSpecialDiscountBalance(name);
+    }
+
+    public String updateGreenBranch(String name, String newBranchName) {
+        return benefitDao.updateGreenBranchByUserName(name, newBranchName);
+    }
+
+    public List<RewardHistoryDto> getRewardHistory(String name) {
+        return benefitDao.selectRewardHistory(name);
+    }
 }
+

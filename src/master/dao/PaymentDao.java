@@ -69,8 +69,9 @@ public class PaymentDao {
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setString(1, paymentType));
     }
 
-    public boolean hasPurchaseByPaymentId(int paymentId) {
+    public boolean existsPurchaseByPaymentId(int paymentId) {
         String sql = "SELECT COUNT(*) FROM purchase WHERE payment_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, paymentId));
     }
 }
+

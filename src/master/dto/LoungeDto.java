@@ -12,3 +12,4 @@ public class LoungeDto {
     private int loungeId;
     private String loungeName;
 }
+

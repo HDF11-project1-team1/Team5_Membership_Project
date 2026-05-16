@@ -15,3 +15,4 @@ public class CoffeeHistoryDto {
     private int userId;
     private LocalDateTime usedDate;
 }
+

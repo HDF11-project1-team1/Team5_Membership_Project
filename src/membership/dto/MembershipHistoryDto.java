@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 public class MembershipHistoryDto {
     private int membershipHistoryId;
     private int userId;
+    private String name;
     private int membershipId;
     private String membershipGrade;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private long calculateAmount;
 }
+

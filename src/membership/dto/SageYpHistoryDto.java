@@ -13,3 +13,4 @@ public class SageYpHistoryDto {
     private int userId;
     private int sageYpStatusId;
 }
+

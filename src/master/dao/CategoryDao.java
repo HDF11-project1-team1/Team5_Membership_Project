@@ -69,8 +69,9 @@ public class CategoryDao {
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setString(1, categoryName));
     }
 
-    public boolean hasBrandByCategoryId(int categoryId) {
+    public boolean existsBrandByCategoryId(int categoryId) {
         String sql = "SELECT COUNT(*) FROM brand WHERE category_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, categoryId));
     }
 }
+

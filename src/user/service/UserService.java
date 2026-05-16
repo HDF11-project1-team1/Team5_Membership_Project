@@ -1,7 +1,7 @@
 package user.service;
 
+import common.exception.ValidationException;
 import membership.dto.MembershipDto;
-import membership.dto.MembershipHistoryDto;
 import user.dao.UserDao;
 import user.dto.UserDto;
 import user.dto.UserTotalInfoDto;
@@ -22,40 +22,31 @@ public class UserService {
     }
 
     public List<UserDto> getAllUsers() {
-        return userDao.findAllUsers();
-    }
-
-    public List<UserTotalInfoDto> getAllUserDetails() {
-        return userDao.findAllUserDetails();
+        return userDao.selectAllUsers();
     }
 
     public List<MembershipDto> getMemberships() {
-        return userDao.findAllMemberships();
+        return userDao.selectAllMemberships();
     }
 
     public List<UserDto> getUsersByMembershipId(int membershipId) {
         validatePositive(membershipId, "멤버십 ID");
-        return userDao.findUsersByMembershipId(membershipId);
+        return userDao.selectUsersByMembershipId(membershipId);
     }
 
     public UserTotalInfoDto getUserDetailByNameAndBirth(String name, LocalDate birth) {
         validateNotBlank(name, "이름");
 
         if (birth == null) {
-            throw new IllegalArgumentException("생년월일은 필수입니다.");
+            throw new ValidationException("생년월일을 입력해주세요.");
         }
 
-        return userDao.findUserDetailByNameAndBirth(name, birth);
-    }
-
-    public UserTotalInfoDto getUserDetailByUserId(int userId) {
-        validatePositive(userId, "회원 ID");
-        return userDao.findUserDetailByUserId(userId);
+        return userDao.selectUserDetailByNameAndBirth(name, birth);
     }
 
     public int registerUser(UserDto user) {
         validateUser(user, false);
-        return userDao.registerUser(user);
+        return userDao.insertUser(user);
     }
 
     public int updateUser(UserDto user) {
@@ -63,13 +54,9 @@ public class UserService {
         return userDao.updateUser(user);
     }
 
-    public List<MembershipHistoryDto> getMembershipHistories() {
-        return userDao.findAllMembershipHistories();
-    }
-
     private void validateUser(UserDto user, boolean requireUserId) {
         if (user == null) {
-            throw new IllegalArgumentException("회원 정보가 없습니다.");
+            throw new ValidationException("회원 정보가 없습니다.");
         }
 
         if (requireUserId) {
@@ -82,27 +69,27 @@ public class UserService {
         validateNotBlank(user.getCardNumber(), "카드번호");
 
         if (user.getGender().length() != 1) {
-            throw new IllegalArgumentException("성별은 1글자로 입력해주세요.");
+            throw new ValidationException("성별은 1글자로 입력해주세요.");
         }
 
         if (user.getBirth() == null) {
-            throw new IllegalArgumentException("생년월일은 필수입니다.");
+            throw new ValidationException("생년월일을 입력해주세요.");
         }
 
         if (user.getCardPeriod() == null) {
-            throw new IllegalArgumentException("카드 유효기간은 필수입니다.");
+            throw new ValidationException("카드 유효기간을 입력해주세요.");
         }
     }
 
     private void validatePositive(int value, String fieldName) {
         if (value <= 0) {
-            throw new IllegalArgumentException(fieldName + "는 1 이상이어야 합니다.");
+            throw new ValidationException(fieldName + "는 1 이상이어야 합니다.");
         }
     }
 
     private void validateNotBlank(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + "은(는) 필수입니다.");
+            throw new ValidationException(fieldName + "을(를) 입력해주세요.");
         }
     }
 }

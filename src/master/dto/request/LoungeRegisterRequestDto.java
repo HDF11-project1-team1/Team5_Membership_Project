@@ -12,3 +12,4 @@ public class LoungeRegisterRequestDto {
     private String loungeName;
     private boolean loungeAvailable;
 }
+

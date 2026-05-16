@@ -254,12 +254,19 @@ public class DefaultPolicyDao {
     }
 
     private void insertRewardPolicyForMembership(Connection conn, int membershipId) throws SQLException {
-        String sql = "INSERT INTO reward_policy (reward_policy_id, membership_id, offer_standard, base_reward_amount) "
-                + "SELECT seq_reward_policy.NEXTVAL, ?, 0, 0 "
-                + "FROM dual "
+        String sql = "INSERT INTO reward_policy "
+                + "(reward_policy_id, membership_id, offer_standard, base_reward_amount, repeat_unit_score, repeat_reward_amount) "
+                + "SELECT seq_reward_policy.NEXTVAL, ?, policy.offer_standard, policy.base_reward_amount, 10000, policy.repeat_reward_amount "
+                + "FROM ("
+                + "    SELECT 15000 AS offer_standard, 225000 AS base_reward_amount, 0 AS repeat_reward_amount FROM dual "
+                + "    UNION ALL "
+                + "    SELECT 30000 AS offer_standard, 450000 AS base_reward_amount, 0 AS repeat_reward_amount FROM dual "
+                + "    UNION ALL "
+                + "    SELECT 40000 AS offer_standard, 600000 AS base_reward_amount, 150000 AS repeat_reward_amount FROM dual "
+                + ") policy "
                 + "WHERE NOT EXISTS ("
                 + "    SELECT 1 FROM reward_policy rp "
-                + "    WHERE rp.membership_id = ? AND rp.offer_standard = 0"
+                + "    WHERE rp.membership_id = ? AND rp.offer_standard = policy.offer_standard"
                 + ")";
         executeUpdate(conn, sql, membershipId, membershipId);
     }

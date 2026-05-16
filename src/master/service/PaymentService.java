@@ -1,74 +1,57 @@
 package master.service;
 
+import common.exception.DuplicateException;
+import common.exception.NotFoundException;
+import common.exception.ValidationException;
 import master.dao.PaymentDao;
 import master.dto.PaymentDto;
-import master.dto.request.PaymentRegisterRequestDto;
-import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
 import static common.validation.InputValidator.hasText;
 import static common.validation.InputValidator.isValidId;
-import static common.validation.InputValidator.isValidMileageRate;
-import static common.validation.InputValidator.isValidRate;
 
 public class PaymentService {
 
     private final PaymentDao paymentDao = new PaymentDao();
-    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
+    // ===== 결제수단 등록 =====
     public boolean registerPayment(String paymentType) {
         if (!hasText(paymentType)) {
-            return false;
+            throw new ValidationException("결제수단명은 필수입니다.");
         }
         if (paymentDao.existsPaymentType(paymentType)) {
-            return false;
+            throw new DuplicateException("이미 등록된 결제수단입니다.");
         }
 
         PaymentDto paymentDto = new PaymentDto(0, paymentType);
         return paymentDao.insertPayment(paymentDto) > 0;
     }
 
-    public boolean registerPayment(PaymentRegisterRequestDto requestDto) {
-        if (requestDto == null) {
-            return false;
-        }
-        if (!hasText(requestDto.getPaymentType())) {
-            return false;
-        }
-        if (!isValidRate(requestDto.getDefaultVipRate()) || !isValidMileageRate(requestDto.getDefaultMileageRate())) {
-            return false;
-        }
-        if (paymentDao.existsPaymentType(requestDto.getPaymentType())) {
-            return false;
-        }
-
-        PaymentDto paymentDto = new PaymentDto(0, requestDto.getPaymentType());
-        int paymentId = paymentDao.insertPaymentAndReturnId(paymentDto);
-        if (!isValidId(paymentId)) {
-            return false;
-        }
-
-        return defaultPolicyService.createDefaultPoliciesForNewPayment(paymentId, requestDto);
-    }
-
-    public List<PaymentDto> findPaymentList() {
+    // ===== 결제수단 목록 조회 =====
+    public List<PaymentDto> getPaymentList() {
         return paymentDao.selectAllPayments();
     }
 
-    public PaymentDto findPaymentDetail(int paymentId) {
+    // ===== 결제수단 상세 조회 =====
+    public PaymentDto getPaymentDetail(int paymentId) {
         if (!isValidId(paymentId)) {
-            return null;
+            throw new ValidationException("결제수단 ID는 1 이상이어야 합니다.");
         }
-        return paymentDao.selectPaymentById(paymentId);
+        PaymentDto payment = paymentDao.selectPaymentById(paymentId);
+        if (payment == null) {
+            throw new NotFoundException("결제수단을 찾을 수 없습니다.");
+        }
+        return payment;
     }
 
+    // ===== 결제수단 수정 =====
     public boolean updatePayment(int paymentId, String paymentType) {
         if (!isValidId(paymentId) || !hasText(paymentType)) {
-            return false;
+            throw new ValidationException("결제수단 ID와 결제수단명은 필수입니다.");
         }
         if (!paymentDao.existsPaymentId(paymentId)) {
-            return false;
+            throw new NotFoundException("수정할 결제수단을 찾을 수 없습니다.");
         }
 
         PaymentDto paymentDto = new PaymentDto(paymentId, paymentType);

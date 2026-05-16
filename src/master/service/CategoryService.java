@@ -1,8 +1,10 @@
 package master.service;
 
+import common.exception.DuplicateException;
+import common.exception.NotFoundException;
+import common.exception.ValidationException;
 import master.dao.CategoryDao;
 import master.dto.CategoryDto;
-import master.dto.request.CategoryRegisterRequestDto;
 
 import java.util.List;
 
@@ -13,47 +15,42 @@ public class CategoryService {
 
     private final CategoryDao categoryDao = new CategoryDao();
 
+    // ===== 카테고리 등록 =====
     public boolean registerCategory(String categoryName) {
         if (!hasText(categoryName)) {
-            return false;
+            throw new ValidationException("카테고리명은 필수입니다.");
         }
         if (categoryDao.existsCategoryName(categoryName)) {
-            return false;
+            throw new DuplicateException("이미 등록된 카테고리명입니다.");
         }
 
         CategoryDto categoryDto = new CategoryDto(0, categoryName);
         return categoryDao.insertCategory(categoryDto) > 0;
     }
 
-    public boolean registerCategory(CategoryRegisterRequestDto requestDto) {
-        if (requestDto == null || !hasText(requestDto.getCategoryName())) {
-            return false;
-        }
-        if (categoryDao.existsCategoryName(requestDto.getCategoryName())) {
-            return false;
-        }
-
-        CategoryDto categoryDto = new CategoryDto(0, requestDto.getCategoryName());
-        return categoryDao.insertCategoryAndReturnId(categoryDto) > 0;
-    }
-
+    // ===== 카테고리 목록 조회 =====
     public List<CategoryDto> findCategoryList() {
         return categoryDao.selectAllCategories();
     }
 
-    public CategoryDto findCategoryDetail(int categoryId) {
+    public CategoryDto getCategoryDetail(int categoryId) {
         if (!isValidId(categoryId)) {
-            return null;
+            throw new ValidationException("카테고리 ID는 1 이상이어야 합니다.");
         }
-        return categoryDao.selectCategoryById(categoryId);
+        CategoryDto category = categoryDao.selectCategoryById(categoryId);
+        if (category == null) {
+            throw new NotFoundException("카테고리를 찾을 수 없습니다.");
+        }
+        return category;
     }
 
+    // ===== 카테고리 수정 =====
     public boolean updateCategory(int categoryId, String categoryName) {
         if (!isValidId(categoryId) || !hasText(categoryName)) {
-            return false;
+            throw new ValidationException("카테고리 ID와 카테고리명은 필수입니다.");
         }
         if (!categoryDao.existsCategoryId(categoryId)) {
-            return false;
+            throw new NotFoundException("수정할 카테고리를 찾을 수 없습니다.");
         }
 
         CategoryDto categoryDto = new CategoryDto(categoryId, categoryName);

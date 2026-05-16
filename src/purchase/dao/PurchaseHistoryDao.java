@@ -1,7 +1,10 @@
 package purchase.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
+import membership.dto.MembershipDto;
 import purchase.dto.PurchaseHistoryDto;
 
 import java.sql.*;
@@ -12,8 +15,37 @@ public class PurchaseHistoryDao {
 
     private static final String SELECT_ALL = "SELECT purchase_history_id, user_id, branch_id, category_id, brand_id, " +
             "       membership_id, payment_id, price, discount_price, discount_rate, " +
-            "       purchase_status, generated_date, vip_amount, mileage_amount " +
+            "       purchase_status, generated_date, vip_amount, mileage_amount, final_price " +
             "FROM purchase_history ";
+
+    public List<MembershipDto> selectAllMemberships() {
+        List<MembershipDto> list = new ArrayList<>();
+        String sql = "SELECT membership_id, membership_grade FROM membership ORDER BY membership_id";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBConnection.getConnection(DBType.ORACLE);
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                MembershipDto dto = new MembershipDto();
+                dto.setMembershipId(rs.getInt("membership_id"));
+                dto.setMembershipGrade(rs.getString("membership_grade"));
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
+        } finally {
+            DBConnection.close(rs);
+            DBConnection.close(pstmt);
+            DBConnection.close(conn);
+        }
+        return list;
+    }
 
     /**
      * 회원 ID로 구매 이력 조회
@@ -38,7 +70,7 @@ public class PurchaseHistoryDao {
                 list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.out.println("PurchaseHistoryDao.selectByUserId : " + e.getMessage());
+            throw new DataAccessException("회원별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -70,7 +102,7 @@ public class PurchaseHistoryDao {
                 list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.out.println("PurchaseHistoryDao.selectByMembershipId : " + e.getMessage());
+            throw new DataAccessException("멤버십별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -79,7 +111,7 @@ public class PurchaseHistoryDao {
         return list;
     }
 
-    // ResultSet → PurchaseHistoryDto 매핑
+    // ResultSet을 PurchaseHistoryDto로 매핑
     private PurchaseHistoryDto mapRow(ResultSet rs) throws SQLException {
         PurchaseHistoryDto dto = new PurchaseHistoryDto();
         dto.setPurchaseHistoryId(rs.getInt("purchase_history_id"));
@@ -99,6 +131,8 @@ public class PurchaseHistoryDao {
         }
         dto.setVipAmount(rs.getInt("vip_amount"));
         dto.setMileageAmount(rs.getInt("mileage_amount"));
+        dto.setFinalPrice(rs.getInt("final_price"));
         return dto;
     }
 }
+

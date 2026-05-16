@@ -18,3 +18,4 @@ public class ParkingHistoryDto {
     private int paymentAmount;
     private boolean valetUseYn;
 }
+

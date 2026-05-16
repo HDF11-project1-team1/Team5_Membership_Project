@@ -16,3 +16,4 @@ public class LoungeHistoryDto {
     private int loungeId;
     private LocalDateTime entryDate;
 }
+

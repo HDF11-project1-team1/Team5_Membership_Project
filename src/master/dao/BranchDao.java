@@ -82,8 +82,9 @@ public class BranchDao {
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setString(1, branchName));
     }
 
-    public boolean hasPurchaseByBranchId(int branchId) {
+    public boolean existsPurchaseByBranchId(int branchId) {
         String sql = "SELECT COUNT(*) FROM purchase WHERE branch_id = ?";
         return jdbcTemplate.exists(sql, pstmt -> pstmt.setInt(1, branchId));
     }
 }
+

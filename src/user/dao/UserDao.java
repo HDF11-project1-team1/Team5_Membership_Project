@@ -1,9 +1,10 @@
 package user.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
 import membership.dto.MembershipDto;
-import membership.dto.MembershipHistoryDto;
 import user.dto.UserDto;
 import user.dto.UserTotalInfoDto;
 
@@ -20,7 +21,7 @@ import java.util.List;
 public class UserDao {
 
     // 1. 전체 회원 조회
-    public List<UserDto> findAllUsers() {
+    public List<UserDto> selectAllUsers() {
 
         List<UserDto> userList = new ArrayList<>();
 
@@ -39,7 +40,7 @@ public class UserDao {
                 userList.add(mapUser(rs));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -50,39 +51,7 @@ public class UserDao {
     }
 
     // 2. 회원 상세 조회 (기본정보 + 상세정보)
-    public List<UserTotalInfoDto> findAllUserDetails() {
-
-        List<UserTotalInfoDto> userTotalInfoList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
-                    "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
-                    "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
-                    "from users u join user_detail d on u.user_id = d.user_id";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                userTotalInfoList.add(mapUserTotalInfo(rs));
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return userTotalInfoList;
-    }
-
-    public UserTotalInfoDto findUserDetailByNameAndBirth(String name, LocalDate birth) {
+    public UserTotalInfoDto selectUserDetailByNameAndBirth(String name, LocalDate birth) {
 
         UserTotalInfoDto user = null;
 
@@ -107,7 +76,7 @@ public class UserDao {
                 user = mapUserTotalInfo(rs);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -118,41 +87,7 @@ public class UserDao {
     }
 
     // pre 3. 멤버십 종류 조회
-    public UserTotalInfoDto findUserDetailByUserId(int userId) {
-
-        UserTotalInfoDto user = null;
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
-                    "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
-                    "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
-                    "from users u join user_detail d on u.user_id = d.user_id " +
-                    "where u.user_id = ?";
-
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, userId);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                user = mapUserTotalInfo(rs);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return user;
-    }
-
-    public List<MembershipDto> findAllMemberships() {
+    public List<MembershipDto> selectAllMemberships() {
 
         List<MembershipDto> membershipList = new ArrayList<>();
 
@@ -181,7 +116,7 @@ public class UserDao {
                 membershipList.add(membership);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -192,7 +127,7 @@ public class UserDao {
     }
 
     // 3. 멤버십별 회원 조회
-    public List<UserDto> findUsersByMembershipId(int membershipId) {
+    public List<UserDto> selectUsersByMembershipId(int membershipId) {
 
         List<UserDto> userList = new ArrayList<>();
 
@@ -213,7 +148,7 @@ public class UserDao {
                 userList.add(mapUser(rs));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십별 회원 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -224,7 +159,7 @@ public class UserDao {
     }
 
     // 4. 신규 회원 등록
-    public int registerUser(UserDto user) {
+    public int insertUser(UserDto user) {
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -255,11 +190,16 @@ public class UserDao {
             DBConnection.close(pstmt);
             pstmt = null;
 
+            LocalDateTime endDate = LocalDate.now()
+                            .withMonth(12)
+                            .withDayOfMonth(31)
+                            .atStartOfDay();
             String historySql = "insert into membership_history (membership_history_id, user_id, membership_id, start_date, end_date, calculated_amount) " +
-                    "values (seq_membership_history.nextval, ?, ?, sysdate, null, 0)";
+                    "values (seq_membership_history.nextval, ?, ?, sysdate, ?, 0)";
             pstmt = conn.prepareStatement(historySql);
             pstmt.setInt(1, user.getUserId());
             pstmt.setInt(2, user.getMembershipId());
+            setTimestamp(pstmt, 3, endDate);
             pstmt.executeUpdate();
 
             conn.commit();
@@ -268,16 +208,14 @@ public class UserDao {
             try {
                 conn.rollback();
             } catch (Exception e1) {
-                System.out.println(e1.getMessage());
+                throw new DataAccessException("회원 등록 롤백 중 오류가 발생했습니다.", e1);
             }
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원을 등록하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(pstmt);
             resetAutoCommit(conn);
             DBConnection.close(conn);
         }
-
-        return 0;
     }
 
     // 5. 회원 정보 수정
@@ -304,55 +242,11 @@ public class UserDao {
 
             return pstmt.executeUpdate();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 정보를 수정하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(pstmt);
             DBConnection.close(conn);
         }
-
-        return 0;
-    }
-
-    // 6. 등급 변경 이력 조회
-    public List<MembershipHistoryDto> findAllMembershipHistories() {
-
-        List<MembershipHistoryDto> historyList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select h.membership_history_id, h.user_id, h.membership_id, m.membership_grade, " +
-                    "h.start_date, h.end_date, h.calculated_amount " +
-                    "from membership_history h join membership m on h.membership_id = m.membership_id " +
-                    "order by h.start_date, h.membership_history_id";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                MembershipHistoryDto history = new MembershipHistoryDto();
-                history.setMembershipHistoryId(rs.getInt("membership_history_id"));
-                history.setUserId(rs.getInt("user_id"));
-                history.setMembershipId(rs.getInt("membership_id"));
-                history.setMembershipGrade(rs.getString("membership_grade"));
-                history.setStartDate(toLocalDateTime(rs.getTimestamp("start_date")));
-                history.setEndDate(toLocalDateTime(rs.getTimestamp("end_date")));
-                history.setCalculateAmount(rs.getLong("calculated_amount"));
-
-                historyList.add(history);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return historyList;
     }
 
     private UserDto mapUser(ResultSet rs) throws Exception {
@@ -414,6 +308,7 @@ public class UserDao {
         return 1;
     }
 
+    // 기본 멤버십 등급 조회
     private int findDefaultMembershipId(Connection conn) throws Exception {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -452,8 +347,9 @@ public class UserDao {
             try {
                 conn.setAutoCommit(true);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                throw new DataAccessException("커밋 모드를 복구하는 중 오류가 발생했습니다.", e);
             }
         }
     }
 }
+
