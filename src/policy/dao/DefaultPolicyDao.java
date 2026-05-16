@@ -2,6 +2,7 @@ package policy.dao;
 
 import common.connection.DBConnection;
 import common.connection.DBType;
+import common.exception.DataAccessException;
 import master.dto.request.BranchRegisterRequestDto;
 import master.dto.request.BrandRegisterRequestDto;
 import master.dto.request.LoungeRegisterRequestDto;
@@ -29,8 +30,7 @@ public class DefaultPolicyDao {
             return true;
         } catch (SQLException e) {
             rollback(conn);
-            System.out.println(e.getMessage());
-            return false;
+            throw new DataAccessException("신규 지점 기본 정책을 생성하는 중 오류가 발생했습니다.", e);
         } finally {
             resetAutoCommit(conn);
             DBConnection.close(conn);
@@ -48,8 +48,7 @@ public class DefaultPolicyDao {
             return true;
         } catch (SQLException e) {
             rollback(conn);
-            System.out.println(e.getMessage());
-            return false;
+            throw new DataAccessException("신규 브랜드 기본 정책을 생성하는 중 오류가 발생했습니다.", e);
         } finally {
             resetAutoCommit(conn);
             DBConnection.close(conn);
@@ -68,8 +67,7 @@ public class DefaultPolicyDao {
             return true;
         } catch (SQLException e) {
             rollback(conn);
-            System.out.println(e.getMessage());
-            return false;
+            throw new DataAccessException("신규 결제수단 기본 정책을 생성하는 중 오류가 발생했습니다.", e);
         } finally {
             resetAutoCommit(conn);
             DBConnection.close(conn);
@@ -90,8 +88,7 @@ public class DefaultPolicyDao {
             return true;
         } catch (SQLException e) {
             rollback(conn);
-            System.out.println(e.getMessage());
-            return false;
+            throw new DataAccessException("신규 멤버십 기본 정책을 생성하는 중 오류가 발생했습니다.", e);
         } finally {
             resetAutoCommit(conn);
             DBConnection.close(conn);
@@ -109,8 +106,7 @@ public class DefaultPolicyDao {
             return true;
         } catch (SQLException e) {
             rollback(conn);
-            System.out.println(e.getMessage());
-            return false;
+            throw new DataAccessException("신규 라운지 기본 정책을 생성하는 중 오류가 발생했습니다.", e);
         } finally {
             resetAutoCommit(conn);
             DBConnection.close(conn);
@@ -310,7 +306,7 @@ public class DefaultPolicyDao {
         try {
             conn.rollback();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("기본 정책 생성 롤백 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -321,7 +317,7 @@ public class DefaultPolicyDao {
         try {
             conn.setAutoCommit(true);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("커밋 모드를 복구하는 중 오류가 발생했습니다.", e);
         }
     }
 }

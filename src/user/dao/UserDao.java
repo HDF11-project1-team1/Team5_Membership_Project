@@ -1,9 +1,9 @@
 package user.dao;
 
-import common.exception.DataAccessException;
-
 import common.connection.DBConnection;
 import common.connection.DBType;
+import common.exception.DataAccessException;
+import common.jdbc.JdbcTemplate;
 import membership.dto.MembershipDto;
 import user.dto.UserDto;
 import user.dto.UserTotalInfoDto;
@@ -11,156 +11,66 @@ import user.dto.UserTotalInfoDto;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
 
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(DBType.ORACLE);
+
     // 1. 전체 회원 조회
     public List<UserDto> selectAllUsers() {
-
-        List<UserDto> userList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select user_id, membership_id, name, gender, phone_number, birth, card_number, card_period, employee_yn from users";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                userList.add(mapUser(rs));
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("회원 목록을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return userList;
+        String sql = "select user_id, membership_id, name, gender, phone_number, birth, card_number, card_period, employee_yn from users";
+        return jdbcTemplate.query(sql, this::mapUser);
     }
 
     // 2. 회원 상세 조회 (기본정보 + 상세정보)
     public UserTotalInfoDto selectUserDetailByNameAndBirth(String name, LocalDate birth) {
+        String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
+                "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
+                "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
+                "from users u join user_detail d on u.user_id = d.user_id " +
+                "where u.name = ? and trunc(u.birth) = ?";
 
-        UserTotalInfoDto user = null;
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select u.user_id, u.membership_id, u.name, u.gender, u.phone_number, u.birth, u.card_number, " +
-                    "u.card_period, u.employee_yn, d.vip_amount, d.mileage_amount, d.total_reward_amount, " +
-                    "d.remain_special_discount_amount, d.remain_coffee, d.visit_date_count, d.purchase_date_count " +
-                    "from users u join user_detail d on u.user_id = d.user_id " +
-                    "where u.name = ? and trunc(u.birth) = ?";
-
-            pstmt = conn.prepareStatement(sql);
+        return jdbcTemplate.queryForObject(sql, pstmt -> {
             pstmt.setString(1, name);
             pstmt.setDate(2, java.sql.Date.valueOf(birth));
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                user = mapUserTotalInfo(rs);
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("회원 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return user;
+        }, this::mapUserTotalInfo);
     }
 
     // pre 3. 멤버십 종류 조회
     public List<MembershipDto> selectAllMemberships() {
+        String sql = "select membership_id, membership_grade, min_amount, max_discount, basic_discount, " +
+                "special_discount_amount, coffee_count from membership order by membership_id";
 
-        List<MembershipDto> membershipList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select membership_id, membership_grade, min_amount, max_discount, basic_discount, " +
-                    "special_discount_amount, coffee_count from membership order by membership_id";
-
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                MembershipDto membership = new MembershipDto();
-                membership.setMembershipId(rs.getInt("membership_id"));
-                membership.setMembershipGrade(rs.getString("membership_grade"));
-                membership.setMinAmount(rs.getInt("min_amount"));
-                membership.setMaxDiscount(rs.getInt("max_discount"));
-                membership.setBasicDiscount(rs.getInt("basic_discount"));
-                membership.setSpecialDiscountAmount(rs.getInt("special_discount_amount"));
-                membership.setCoffeeCount(rs.getInt("coffee_count"));
-
-                membershipList.add(membership);
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return membershipList;
+        return jdbcTemplate.query(sql, rs -> {
+            MembershipDto membership = new MembershipDto();
+            membership.setMembershipId(rs.getInt("membership_id"));
+            membership.setMembershipGrade(rs.getString("membership_grade"));
+            membership.setMinAmount(rs.getInt("min_amount"));
+            membership.setMaxDiscount(rs.getInt("max_discount"));
+            membership.setBasicDiscount(rs.getInt("basic_discount"));
+            membership.setSpecialDiscountAmount(rs.getInt("special_discount_amount"));
+            membership.setCoffeeCount(rs.getInt("coffee_count"));
+            return membership;
+        });
     }
 
     // 3. 멤버십별 회원 조회
     public List<UserDto> selectUsersByMembershipId(int membershipId) {
+        String sql = "select user_id, membership_id, name, gender, phone_number, birth, card_number, card_period, employee_yn " +
+                "from users where membership_id = ? order by user_id";
 
-        List<UserDto> userList = new ArrayList<>();
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "select user_id, membership_id, name, gender, phone_number, birth, card_number, card_period, employee_yn " +
-                    "from users where membership_id = ? order by user_id";
-
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, membershipId);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                userList.add(mapUser(rs));
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("멤버십별 회원 목록을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-
-        return userList;
+        return jdbcTemplate.query(sql, pstmt -> pstmt.setInt(1, membershipId), this::mapUser);
     }
 
     // 4. 신규 회원 등록
+    // users와 membership_history를 함께 생성해야 하므로 명시적 트랜잭션 유지
     public int insertUser(UserDto user) {
-
         Connection conn = null;
         PreparedStatement pstmt = null;
 
@@ -191,9 +101,9 @@ public class UserDao {
             pstmt = null;
 
             LocalDateTime endDate = LocalDate.now()
-                            .withMonth(12)
-                            .withDayOfMonth(31)
-                            .atStartOfDay();
+                    .withMonth(12)
+                    .withDayOfMonth(31)
+                    .atStartOfDay();
             String historySql = "insert into membership_history (membership_history_id, user_id, membership_id, start_date, end_date, calculated_amount) " +
                     "values (seq_membership_history.nextval, ?, ?, sysdate, ?, 0)";
             pstmt = conn.prepareStatement(historySql);
@@ -206,9 +116,11 @@ public class UserDao {
             return result;
         } catch (Exception e) {
             try {
-                conn.rollback();
-            } catch (Exception e1) {
-                throw new DataAccessException("회원 등록 롤백 중 오류가 발생했습니다.", e1);
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception rollbackException) {
+                throw new DataAccessException("회원 등록 롤백 중 오류가 발생했습니다.", rollbackException);
             }
             throw new DataAccessException("회원을 등록하는 중 오류가 발생했습니다.", e);
         } finally {
@@ -220,16 +132,10 @@ public class UserDao {
 
     // 5. 회원 정보 수정
     public int updateUser(UserDto user) {
+        String sql = "update users set membership_id = ?, name = ?, gender = ?, phone_number = ?, birth = ?, " +
+                "card_number = ?, card_period = ?, employee_yn = ? where user_id = ?";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            String sql = "update users set membership_id = ?, name = ?, gender = ?, phone_number = ?, birth = ?, " +
-                    "card_number = ?, card_period = ?, employee_yn = ? where user_id = ?";
-
-            pstmt = conn.prepareStatement(sql);
+        return jdbcTemplate.update(sql, pstmt -> {
             pstmt.setInt(1, user.getMembershipId());
             pstmt.setString(2, user.getName());
             pstmt.setString(3, user.getGender());
@@ -239,19 +145,11 @@ public class UserDao {
             setTimestamp(pstmt, 7, user.getCardPeriod());
             pstmt.setInt(8, user.isEmployeeYn() ? 1 : 0);
             pstmt.setInt(9, user.getUserId());
-
-            return pstmt.executeUpdate();
-        } catch (Exception e) {
-            throw new DataAccessException("회원 정보를 수정하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
+        });
     }
 
-    private UserDto mapUser(ResultSet rs) throws Exception {
+    private UserDto mapUser(ResultSet rs) throws SQLException {
         UserDto user = new UserDto();
-
         user.setUserId(rs.getInt("user_id"));
         user.setMembershipId(rs.getInt("membership_id"));
         user.setName(rs.getString("name"));
@@ -261,13 +159,11 @@ public class UserDao {
         user.setCardNumber(rs.getString("card_number"));
         user.setCardPeriod(toLocalDateTime(rs.getTimestamp("card_period")));
         user.setEmployeeYn(rs.getInt("employee_yn") == 1);
-
         return user;
     }
 
-    private UserTotalInfoDto mapUserTotalInfo(ResultSet rs) throws Exception {
+    private UserTotalInfoDto mapUserTotalInfo(ResultSet rs) throws SQLException {
         UserTotalInfoDto user = new UserTotalInfoDto();
-
         user.setUserId(rs.getInt("user_id"));
         user.setMembershipId(rs.getInt("membership_id"));
         user.setName(rs.getString("name"));
@@ -284,11 +180,10 @@ public class UserDao {
         user.setRemainCoffee(rs.getInt("remain_coffee"));
         user.setVisitDateCount(rs.getInt("visit_date_count"));
         user.setPurchaseDateCount(rs.getInt("purchase_date_count"));
-
         return user;
     }
 
-    private int getNextSequenceValue(Connection conn, String sequenceName) throws Exception {
+    private int getNextSequenceValue(Connection conn, String sequenceName) throws SQLException {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
@@ -309,7 +204,7 @@ public class UserDao {
     }
 
     // 기본 멤버십 등급 조회
-    private int findDefaultMembershipId(Connection conn) throws Exception {
+    private int findDefaultMembershipId(Connection conn) throws SQLException {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
@@ -333,7 +228,7 @@ public class UserDao {
         return timestamp == null ? null : timestamp.toLocalDateTime();
     }
 
-    private void setTimestamp(PreparedStatement pstmt, int index, LocalDateTime value) throws Exception {
+    private void setTimestamp(PreparedStatement pstmt, int index, LocalDateTime value) throws SQLException {
         if (value == null) {
             pstmt.setNull(index, Types.TIMESTAMP);
             return;
@@ -352,4 +247,3 @@ public class UserDao {
         }
     }
 }
-

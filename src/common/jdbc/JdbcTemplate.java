@@ -13,13 +13,23 @@ import java.util.List;
 
 public class JdbcTemplate {
 
+    private final DBType dbType;
+
+    public JdbcTemplate() {
+        this(DBType.LOCALDB);
+    }
+
+    public JdbcTemplate(DBType dbType) {
+        this.dbType = dbType;
+    }
+
     public int update(String sql) {
         return update(sql, null);
     }
 
     public int update(String sql, PreparedStatementSetter setter) {
         try (
-                Connection conn = DBConnection.getConnection(DBType.LOCALDB);
+                Connection conn = DBConnection.getConnection(dbType);
                 PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             setParameters(pstmt, setter);
@@ -37,7 +47,7 @@ public class JdbcTemplate {
         List<T> result = new ArrayList<>();
 
         try (
-                Connection conn = DBConnection.getConnection(DBType.LOCALDB);
+                Connection conn = DBConnection.getConnection(dbType);
                 PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             setParameters(pstmt, setter);
@@ -81,4 +91,3 @@ public class JdbcTemplate {
         }
     }
 }
-
