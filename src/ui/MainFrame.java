@@ -8,6 +8,7 @@ import ui.panels.policy.PolicyPanel;
 import ui.panels.purchase.PurchasePanel;
 import ui.panels.vip.VipPanel;
 import ui.panels.benefit.BenefitPanel;
+import ui.panels.master.MasterPanel;
 
 public class MainFrame extends JFrame {
     private JPanel cardPanel;
@@ -22,6 +23,7 @@ public class MainFrame extends JFrame {
     private BenefitPanel benefitPanel;
     private PolicyPanel policyPanel;
     private ui.panels.stat.StatPanel statPanel;
+    private MasterPanel masterPanel;
 
     public MainFrame() {
         setTitle("현대백화점 VIP 멤버십 관리 프로그램");
@@ -37,6 +39,7 @@ public class MainFrame extends JFrame {
         benefitPanel = new BenefitPanel(this);
         policyPanel = new PolicyPanel(this);
         statPanel = new ui.panels.stat.StatPanel();
+        masterPanel = new MasterPanel(this);
 
         // 1. 네비게이션 바 (좌측)
         navPanel = createNavPanel();
@@ -54,6 +57,7 @@ public class MainFrame extends JFrame {
         cardPanel.add(benefitPanel, "BENEFIT");
         cardPanel.add(policyPanel, "POLICY");
         cardPanel.add(statPanel, "STAT");
+        cardPanel.add(masterPanel, "MASTER");
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -71,10 +75,10 @@ public class MainFrame extends JFrame {
         titleLabel = new JLabel("VIP 멤버십");
         titleLabel.setFont(UIConstants.HEADER_FONT);
         titleLabel.setForeground(UIConstants.TEXT_MAIN);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
         titleLabel.setMaximumSize(new Dimension(220, 100));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(40, 25, 40, 0));
         panel.add(titleLabel);
 
         // 메인 메뉴 버튼들 (심플 버전)
@@ -91,6 +95,8 @@ public class MainFrame extends JFrame {
         panel.add(createNavButton("⚙️ 정책 관리", "POLICY", null));
         panel.add(Box.createVerticalStrut(5));
         panel.add(createNavButton("📊 통계 및 분석", "STAT", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("📁 기준 정보 관리", "MASTER", null));
 
         panel.add(Box.createVerticalGlue());
         return panel;
@@ -118,6 +124,7 @@ public class MainFrame extends JFrame {
         btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setMaximumSize(new Dimension(220, 50));
+        btn.setAlignmentX(Component.LEFT_ALIGNMENT);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 20));
 

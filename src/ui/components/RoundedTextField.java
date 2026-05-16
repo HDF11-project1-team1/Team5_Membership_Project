@@ -41,25 +41,29 @@ public class RoundedTextField extends JTextField {
 
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (!isOpaque()) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            // 배경색 그리기
+            g2.setColor(getBackground() != null ? getBackground() : Color.WHITE);
+            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
+            g2.dispose();
+        }
         
-        // 배경색
-        g2.setColor(getBackground());
-        g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
-        
-        super.paintComponent(g2); // g2를 넘겨야 렌더링 힌트가 적용됨
+        super.paintComponent(g);
 
         // Placeholder 그리기
         if (placeholder != null && !placeholder.isEmpty() && getText().isEmpty()) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(UIConstants.TEXT_SECONDARY);
             g2.setFont(getFont());
             FontMetrics fm = g2.getFontMetrics();
             int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
             g2.drawString(placeholder, getInsets().left, y);
+            g2.dispose();
         }
-
-        g2.dispose();
     }
 
     @Override
