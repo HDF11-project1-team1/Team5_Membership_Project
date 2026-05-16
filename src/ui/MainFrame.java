@@ -82,21 +82,21 @@ public class MainFrame extends JFrame {
         panel.add(titleLabel);
 
         // 메인 메뉴 버튼들 (심플 버전)
-        panel.add(createNavButton(" 메인 홈", "HOME", "home.png"));
+        panel.add(createNavButton("메인 홈", "HOME", "home.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("👥 회원 관리", "USER", null));
+        panel.add(createNavButton("회원 관리", "USER", "user.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("💰 구매 관리", "PURCHASE", null));
+        panel.add(createNavButton("구매 관리", "PURCHASE", "bag.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("👑 VIP 멤버십 관리", "VIP", null));
+        panel.add(createNavButton("VIP 멤버십 관리", "VIP", "crown.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("🎁 혜택 이용 관리", "BENEFIT", null));
+        panel.add(createNavButton("혜택 이용 관리", "BENEFIT", "gift.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("⚙️ 정책 관리", "POLICY", null));
+        panel.add(createNavButton("정책 관리", "POLICY", "setting.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("📊 통계 및 분석", "STAT", null));
+        panel.add(createNavButton("통계 및 분석", "STAT", "analysis.png"));
         panel.add(Box.createVerticalStrut(5));
-        panel.add(createNavButton("📁 기준 정보 관리", "MASTER", null));
+        panel.add(createNavButton("기준 정보 관리", "MASTER", "database.png"));
 
         panel.add(Box.createVerticalGlue());
         return panel;

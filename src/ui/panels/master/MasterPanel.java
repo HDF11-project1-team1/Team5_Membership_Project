@@ -4,6 +4,7 @@ import ui.UIConstants;
 import ui.MainFrame;
 import ui.components.RoundedButton;
 import ui.components.RoundedTextField;
+import ui.components.StyledTable;
 import master.service.*;
 import master.dto.*;
 
@@ -159,10 +160,7 @@ public class MasterPanel extends JPanel {
         }
 
         DefaultTableModel model = new DefaultTableModel(initialData, cols);
-        JTable table = new JTable(model);
-        table.setRowHeight(30);
-        table.setFont(UIConstants.BODY_FONT);
-        table.getTableHeader().setFont(UIConstants.BODY_BOLD_FONT);
+        StyledTable table = new StyledTable(model);
         leftP.add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel rightP = new JPanel();
