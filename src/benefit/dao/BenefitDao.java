@@ -539,14 +539,20 @@ public class BenefitDao {
                 return false;
             }
 
-            // 당일 이용 이력 체크 (특정 라운지 기준)
+            // 1. 라운지 정책 이용 가능 여부 우선 확인
+            boolean isPolicyAvailable = selectLoungePolicyAvailable(conn, userInfo.getMembershipGrade(), branchName, loungeName);
+            if (!isPolicyAvailable) {
+                return false;
+            }
+
+            // 2. 당일 이용 이력 체크 (특정 라운지 기준)
             int loungeId = selectLoungeIdByName(conn, loungeName);
             if (loungeId != -1 && existsLoungeHistoryToday(conn, userInfo.getUserId(), loungeId)) {
                 System.out.println("[라운지] 오늘 이미 " + loungeName + "을(를) 이용하셨습니다.");
                 return false;
             }
 
-            return selectLoungePolicyAvailable(conn, userInfo.getMembershipGrade(), branchName, loungeName);
+            return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
