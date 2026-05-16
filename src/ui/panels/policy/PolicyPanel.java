@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class PolicyPanel extends JPanel {
     private MainFrame mainFrame;
     private PolicyUpdateService policyService;
+    private JTabbedPane tabbedPane;
 
     public PolicyPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -31,7 +32,7 @@ public class PolicyPanel extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
 
         // 중앙 탭 패널
-        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane = new JTabbedPane();
         tabbedPane.setFont(UIConstants.BODY_BOLD_FONT);
         tabbedPane.setBackground(Color.WHITE);
 
@@ -42,6 +43,12 @@ public class PolicyPanel extends JPanel {
         tabbedPane.addTab("라운지 정책", createLoungeTab());
 
         add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    public void setTab(int index) {
+        if (tabbedPane != null && index >= 0 && index < tabbedPane.getTabCount()) {
+            tabbedPane.setSelectedIndex(index);
+        }
     }
 
     private JPanel createMileageTab() {

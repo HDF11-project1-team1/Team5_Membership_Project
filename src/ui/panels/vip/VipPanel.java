@@ -106,7 +106,7 @@ public class VipPanel extends JPanel {
         return mainArea;
     }
 
-    private void loadCurrentGrades() {
+    public void loadCurrentGrades() {
         tableModel.setColumnIdentifiers(new String[] { "회원ID", "이름", "전화번호", "현재 등급" });
         tableModel.setRowCount(0);
         List<MembershipCurrentGradeDto> list = membershipService.getCurrentMembershipGrades();
@@ -115,7 +115,7 @@ public class VipPanel extends JPanel {
         }
     }
 
-    private void loadEarlyGreen() {
+    public void loadEarlyGreen() {
         tableModel.setColumnIdentifiers(new String[] { "회원ID", "이름", "전화번호", "현재 등급(EARLY)" });
         tableModel.setRowCount(0);
         List<MembershipCurrentGradeDto> list = membershipService.getEarlyGreenMembers();
@@ -124,7 +124,7 @@ public class VipPanel extends JPanel {
         }
     }
 
-    private void loadHistory() {
+    public void loadHistory() {
         try {
             String name = nameField.getText().trim();
             LocalDate birth = LocalDate.parse(birthField.getText().trim());

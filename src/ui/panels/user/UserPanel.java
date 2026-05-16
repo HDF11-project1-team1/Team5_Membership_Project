@@ -317,7 +317,7 @@ public class UserPanel extends JPanel {
         }
     }
 
-    private void prepareNewUser() {
+    public void prepareNewUser() {
         userTable.clearSelection();
         selectedUserId = -1;
         detailTitle.setText("신규 회원 등록");

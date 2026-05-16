@@ -12,16 +12,32 @@ import ui.panels.benefit.BenefitPanel;
 public class MainFrame extends JFrame {
     private JPanel cardPanel;
     private CardLayout cardLayout;
+    private JPanel navPanel;
+    private JLabel titleLabel;
+    
+    // 각 패널 참조
+    private UserPanel userPanel;
+    private PurchasePanel purchasePanel;
+    private VipPanel vipPanel;
+    private BenefitPanel benefitPanel;
+    private PolicyPanel policyPanel;
 
     public MainFrame() {
         setTitle("현대백화점 VIP 멤버십 관리 프로그램");
-        setSize(1200, 800); // 패널 크기를 고려하여 창 크기 상향 조정
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // 패널들 선 생성
+        userPanel = new UserPanel(this);
+        purchasePanel = new PurchasePanel(this);
+        vipPanel = new VipPanel(this);
+        benefitPanel = new BenefitPanel(this);
+        policyPanel = new PolicyPanel(this);
+
         // 1. 네비게이션 바 (좌측)
-        JPanel navPanel = createNavPanel();
+        navPanel = createNavPanel();
         add(navPanel, BorderLayout.WEST);
 
         // 2. 컨텐츠 영역 (우측 메인, CardLayout 적용)
@@ -29,87 +45,91 @@ public class MainFrame extends JFrame {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(UIConstants.BACKGROUND_COLOR);
 
-        // 패널들 생성 및 추가
         cardPanel.add(new HomePanel(this), "HOME");
-        cardPanel.add(new UserPanel(this), "USER");
-        cardPanel.add(new PolicyPanel(this), "POLICY");
-        cardPanel.add(new PurchasePanel(this), "PURCHASE");
-        cardPanel.add(new VipPanel(this), "VIP");
-        cardPanel.add(new BenefitPanel(this), "BENEFIT");
+        cardPanel.add(userPanel, "USER");
+        cardPanel.add(purchasePanel, "PURCHASE");
+        cardPanel.add(vipPanel, "VIP");
+        cardPanel.add(benefitPanel, "BENEFIT");
+        cardPanel.add(policyPanel, "POLICY");
 
         add(cardPanel, BorderLayout.CENTER);
 
-        // 처음 켰을 때 보여줄 화면 설정
         cardLayout.show(cardPanel, "HOME");
     }
 
-    // 좌측 네비게이션 바 생성 메서드
     private JPanel createNavPanel() {
-        JPanel navPanel = new JPanel();
-        navPanel.setPreferredSize(new Dimension(200, getHeight()));
-        navPanel.setBackground(UIConstants.SURFACE_COLOR);
-        navPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIConstants.LINE_COLOR)); // 우측 연한 구분선
-        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.Y_AXIS));
+        JPanel panel = new JPanel();
+        panel.setPreferredSize(new Dimension(220, getHeight()));
+        panel.setBackground(UIConstants.SURFACE_COLOR);
+        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIConstants.LINE_COLOR));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        // 상단 로고/타이틀 영역
-        JLabel titleLabel = new JLabel("VIP 멤버십");
+        // 상단 타이틀
+        titleLabel = new JLabel("VIP 멤버십");
         titleLabel.setFont(UIConstants.HEADER_FONT);
         titleLabel.setForeground(UIConstants.TEXT_MAIN);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
-        navPanel.add(titleLabel);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setMaximumSize(new Dimension(220, 100));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
+        panel.add(titleLabel);
 
-        // 메뉴 버튼들
-        navPanel.add(createNavButton("🏠 메인 홈", "HOME"));
-        navPanel.add(Box.createVerticalStrut(10));
-        navPanel.add(createNavButton("👥 회원 관리", "USER"));
-        navPanel.add(Box.createVerticalStrut(5));
-        navPanel.add(createNavButton("💰 구매 관리", "PURCHASE"));
-        navPanel.add(Box.createVerticalStrut(5));
-        navPanel.add(createNavButton("👑 VIP 멤버십 관리", "VIP"));
-        navPanel.add(Box.createVerticalStrut(5));
-        navPanel.add(createNavButton("🎁 혜택 이용 관리", "BENEFIT"));
-        navPanel.add(Box.createVerticalStrut(5));
-        navPanel.add(createNavButton("⚙️ 정책 관리", "POLICY"));
+        // 메인 메뉴 버튼들 (심플 버전)
+        panel.add(createNavButton(" 메인 홈", "HOME", "home.png"));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("👥 회원 관리", "USER", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("💰 구매 관리", "PURCHASE", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("👑 VIP 멤버십 관리", "VIP", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("🎁 혜택 이용 관리", "BENEFIT", null));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(createNavButton("⚙️ 정책 관리", "POLICY", null));
 
-        // 하단 빈 공간 채우기
-        navPanel.add(Box.createVerticalGlue());
-
-        return navPanel;
+        panel.add(Box.createVerticalGlue());
+        return panel;
     }
 
-    // 네비게이션 바용 투명 버튼 생성기
-    private JButton createNavButton(String text, String panelName) {
+    private JButton createNavButton(String text, String panelName, String iconFile) {
         JButton btn = new JButton(text);
+        
+        if (iconFile != null) {
+            try {
+                String path = "src/ui/icon/" + iconFile;
+                ImageIcon icon = new ImageIcon(path);
+                Image img = icon.getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+                btn.setIcon(new ImageIcon(img));
+                btn.setIconTextGap(15);
+            } catch (Exception e) {
+                System.err.println("Icon load error: " + e.getMessage());
+            }
+        }
+
         btn.setFont(UIConstants.BODY_BOLD_FONT);
         btn.setForeground(UIConstants.TEXT_MAIN);
-        btn.setBackground(UIConstants.SURFACE_COLOR);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(200, 50));
+        btn.setMaximumSize(new Dimension(220, 50));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // 좌우 패딩 넉넉하게
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 20));
         
         btn.addActionListener(e -> switchPanel(panelName));
 
-        // 마우스 호버 시 약간 회색빛으로 변하는 효과
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setOpaque(true);
-                btn.setBackground(UIConstants.BACKGROUND_COLOR);
+                btn.setForeground(UIConstants.PRIMARY_COLOR);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setOpaque(false);
-                btn.setBackground(UIConstants.SURFACE_COLOR);
+                btn.setForeground(UIConstants.TEXT_MAIN);
             }
         });
         
         return btn;
     }
 
-    // 다른 패널에서 화면 전환을 요청할 때 사용하는 메서드
     public void switchPanel(String panelName) {
         cardLayout.show(cardPanel, panelName);
     }
