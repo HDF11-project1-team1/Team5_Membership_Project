@@ -9,8 +9,8 @@ public class BenefitService {
 
     private final BenefitDao benefitDao = new BenefitDao();
 
-    public boolean getLoungePolicyAvailability(String membershipGrade, String branchName, String loungeName) {
-        return benefitDao.selectLoungePolicyAvailability(membershipGrade, branchName, loungeName);
+    public boolean getLoungePolicyAvailability(String name, String branchName, String loungeName) {
+        return benefitDao.selectLoungePolicyAvailability(name, branchName, loungeName);
     }
 
     public int getCafeHPolicyCount(String membershipGrade) {
