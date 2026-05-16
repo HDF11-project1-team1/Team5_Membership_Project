@@ -1,5 +1,7 @@
 package membership.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
 import membership.dto.MembershipCurrentGradeDto;
@@ -45,7 +47,7 @@ public class MembershipDao {
                 membershipGradeList.add(currentGrade);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -93,7 +95,7 @@ public class MembershipDao {
                 membershipHistoryList.add(membershipHistory);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -133,7 +135,7 @@ public class MembershipDao {
                 earlyGreenList.add(earlyGreen);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);

@@ -1,5 +1,7 @@
 package purchase.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
 import membership.dto.MembershipDto;
@@ -36,7 +38,7 @@ public class PurchaseHistoryDao {
                 list.add(dto);
             }
         } catch (SQLException e) {
-            System.out.println("PurchaseHistoryDao.selectAllMemberships : " + e.getMessage());
+            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -68,7 +70,7 @@ public class PurchaseHistoryDao {
                 list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.out.println("PurchaseHistoryDao.selectByUserId : " + e.getMessage());
+            throw new DataAccessException("회원별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -100,7 +102,7 @@ public class PurchaseHistoryDao {
                 list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.out.println("PurchaseHistoryDao.selectByMembershipId : " + e.getMessage());
+            throw new DataAccessException("멤버십별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);

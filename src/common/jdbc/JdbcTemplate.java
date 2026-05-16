@@ -2,6 +2,7 @@ package common.jdbc;
 
 import common.connection.DBConnection;
 import common.connection.DBType;
+import common.exception.DataAccessException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,8 +25,7 @@ public class JdbcTemplate {
             setParameters(pstmt, setter);
             return pstmt.executeUpdate();
         } catch (SQLException | NullPointerException e) {
-            System.out.println(e.getMessage());
-            return 0;
+            throw new DataAccessException("DB 수정 작업 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class JdbcTemplate {
                 }
             }
         } catch (SQLException | NullPointerException e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("DB 조회 작업 중 오류가 발생했습니다.", e);
         }
 
         return result;

@@ -1,5 +1,8 @@
 package master.service;
 
+import common.exception.DuplicateException;
+import common.exception.NotFoundException;
+import common.exception.ValidationException;
 import master.dao.PaymentDao;
 import master.dto.PaymentDto;
 
@@ -15,10 +18,10 @@ public class PaymentService {
     // ===== 결제수단 등록 =====
     public boolean registerPayment(String paymentType) {
         if (!hasText(paymentType)) {
-            return false;
+            throw new ValidationException("결제수단명은 필수입니다.");
         }
         if (paymentDao.existsPaymentType(paymentType)) {
-            return false;
+            throw new DuplicateException("이미 등록된 결제수단입니다.");
         }
 
         PaymentDto paymentDto = new PaymentDto(0, paymentType);
@@ -33,22 +36,25 @@ public class PaymentService {
     // ===== 결제수단 상세 조회 =====
     public PaymentDto getPaymentDetail(int paymentId) {
         if (!isValidId(paymentId)) {
-            return null;
+            throw new ValidationException("결제수단 ID는 1 이상이어야 합니다.");
         }
-        return paymentDao.selectPaymentById(paymentId);
+        PaymentDto payment = paymentDao.selectPaymentById(paymentId);
+        if (payment == null) {
+            throw new NotFoundException("결제수단을 찾을 수 없습니다.");
+        }
+        return payment;
     }
 
     // ===== 결제수단 수정 =====
     public boolean updatePayment(int paymentId, String paymentType) {
         if (!isValidId(paymentId) || !hasText(paymentType)) {
-            return false;
+            throw new ValidationException("결제수단 ID와 결제수단명은 필수입니다.");
         }
         if (!paymentDao.existsPaymentId(paymentId)) {
-            return false;
+            throw new NotFoundException("수정할 결제수단을 찾을 수 없습니다.");
         }
 
         PaymentDto paymentDto = new PaymentDto(paymentId, paymentType);
         return paymentDao.updatePayment(paymentDto) > 0;
     }
 }
-
