@@ -1,17 +1,18 @@
 package purchase.dao;
 
-import common.exception.DataAccessException;
-
-import common.connection.DBConnection;
 import common.connection.DBType;
+import common.jdbc.JdbcTemplate;
 import membership.dto.MembershipDto;
 import purchase.dto.PurchaseHistoryDto;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class PurchaseHistoryDao {
+
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(DBType.ORACLE);
 
     private static final String SELECT_ALL = "SELECT purchase_history_id, user_id, branch_id, category_id, brand_id, " +
             "       membership_id, payment_id, price, discount_price, discount_rate, " +
@@ -19,96 +20,35 @@ public class PurchaseHistoryDao {
             "FROM purchase_history ";
 
     public List<MembershipDto> selectAllMemberships() {
-        List<MembershipDto> list = new ArrayList<>();
         String sql = "SELECT membership_id, membership_grade FROM membership ORDER BY membership_id";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                MembershipDto dto = new MembershipDto();
-                dto.setMembershipId(rs.getInt("membership_id"));
-                dto.setMembershipGrade(rs.getString("membership_grade"));
-                list.add(dto);
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        return jdbcTemplate.query(sql, rs -> {
+            MembershipDto dto = new MembershipDto();
+            dto.setMembershipId(rs.getInt("membership_id"));
+            dto.setMembershipGrade(rs.getString("membership_grade"));
+            return dto;
+        });
     }
 
     /**
      * 회원 ID로 구매 이력 조회
      */
     public List<PurchaseHistoryDto> selectByUserId(int userId) {
-        List<PurchaseHistoryDto> list = new ArrayList<>();
         String sql = SELECT_ALL +
                 "WHERE user_id = ? " +
                 "ORDER BY generated_date DESC";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, userId);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                list.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("회원별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        return jdbcTemplate.query(sql, pstmt -> pstmt.setInt(1, userId), this::mapRow);
     }
 
     /**
      * 멤버십 ID로 구매 이력 조회
      */
     public List<PurchaseHistoryDto> selectByMembershipId(int membershipId) {
-        List<PurchaseHistoryDto> list = new ArrayList<>();
         String sql = SELECT_ALL +
                 "WHERE membership_id = ? " +
                 "ORDER BY generated_date DESC";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBConnection.getConnection(DBType.ORACLE);
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, membershipId);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                list.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("멤버십별 구매 이력을 조회하는 중 오류가 발생했습니다.", e);
-        } finally {
-            DBConnection.close(rs);
-            DBConnection.close(pstmt);
-            DBConnection.close(conn);
-        }
-        return list;
+        return jdbcTemplate.query(sql, pstmt -> pstmt.setInt(1, membershipId), this::mapRow);
     }
 
     // ResultSet을 PurchaseHistoryDto로 매핑
@@ -135,4 +75,3 @@ public class PurchaseHistoryDao {
         return dto;
     }
 }
-
