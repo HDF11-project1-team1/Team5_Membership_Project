@@ -10,8 +10,22 @@ public class LoungeDao {
     private final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     public int insertLounge(LoungeDto loungeDto) {
-        String sql = "INSERT INTO lounge (lounge_id, lounge_name) VALUES (seq_lounge.NEXTVAL, ?)";
-        return jdbcTemplate.update(sql, pstmt -> pstmt.setString(1, loungeDto.getLoungeName()));
+        return insertLoungeAndReturnId(loungeDto) > 0 ? 1 : 0;
+    }
+
+    public int insertLoungeAndReturnId(LoungeDto loungeDto) {
+        Integer loungeId = jdbcTemplate.queryForObject("SELECT seq_lounge.NEXTVAL FROM dual", rs -> rs.getInt(1));
+        if (loungeId == null) {
+            return 0;
+        }
+
+        String sql = "INSERT INTO lounge (lounge_id, lounge_name) VALUES (?, ?)";
+        int result = jdbcTemplate.update(sql, pstmt -> {
+            pstmt.setInt(1, loungeId);
+            pstmt.setString(2, loungeDto.getLoungeName());
+        });
+
+        return result > 0 ? loungeId : 0;
     }
 
     public List<LoungeDto> selectAllLounges() {

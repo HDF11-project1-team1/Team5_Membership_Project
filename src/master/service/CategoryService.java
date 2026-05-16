@@ -2,6 +2,7 @@ package master.service;
 
 import master.dao.CategoryDao;
 import master.dto.CategoryDto;
+import master.dto.request.CategoryRegisterRequestDto;
 
 import java.util.List;
 
@@ -12,7 +13,6 @@ public class CategoryService {
 
     private final CategoryDao categoryDao = new CategoryDao();
 
-    // ===== 카테고리 등록 =====
     public boolean registerCategory(String categoryName) {
         if (!hasText(categoryName)) {
             return false;
@@ -25,7 +25,18 @@ public class CategoryService {
         return categoryDao.insertCategory(categoryDto) > 0;
     }
 
-    // ===== 카테고리 목록 조회 =====
+    public boolean registerCategory(CategoryRegisterRequestDto requestDto) {
+        if (requestDto == null || !hasText(requestDto.getCategoryName())) {
+            return false;
+        }
+        if (categoryDao.existsCategoryName(requestDto.getCategoryName())) {
+            return false;
+        }
+
+        CategoryDto categoryDto = new CategoryDto(0, requestDto.getCategoryName());
+        return categoryDao.insertCategoryAndReturnId(categoryDto) > 0;
+    }
+
     public List<CategoryDto> findCategoryList() {
         return categoryDao.selectAllCategories();
     }
@@ -37,7 +48,6 @@ public class CategoryService {
         return categoryDao.selectCategoryById(categoryId);
     }
 
-    // ===== 카테고리 수정 =====
     public boolean updateCategory(int categoryId, String categoryName) {
         if (!isValidId(categoryId) || !hasText(categoryName)) {
             return false;
@@ -49,5 +59,4 @@ public class CategoryService {
         CategoryDto categoryDto = new CategoryDto(categoryId, categoryName);
         return categoryDao.updateCategory(categoryDto) > 0;
     }
-
 }

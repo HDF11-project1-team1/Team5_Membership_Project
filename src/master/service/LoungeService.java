@@ -2,6 +2,8 @@ package master.service;
 
 import master.dao.LoungeDao;
 import master.dto.LoungeDto;
+import master.dto.request.LoungeRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
@@ -11,8 +13,8 @@ import static common.validation.InputValidator.isValidId;
 public class LoungeService {
 
     private final LoungeDao loungeDao = new LoungeDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
-    // ===== 라운지 등록 =====
     public boolean registerLounge(String loungeName) {
         if (!hasText(loungeName)) {
             return false;
@@ -25,12 +27,30 @@ public class LoungeService {
         return loungeDao.insertLounge(loungeDto) > 0;
     }
 
-    // ===== 라운지 목록 조회 =====
+    public boolean registerLounge(LoungeRegisterRequestDto requestDto) {
+        if (requestDto == null) {
+            return false;
+        }
+        if (!hasText(requestDto.getLoungeName())) {
+            return false;
+        }
+        if (loungeDao.existsLoungeName(requestDto.getLoungeName())) {
+            return false;
+        }
+
+        LoungeDto loungeDto = new LoungeDto(0, requestDto.getLoungeName());
+        int loungeId = loungeDao.insertLoungeAndReturnId(loungeDto);
+        if (!isValidId(loungeId)) {
+            return false;
+        }
+
+        return defaultPolicyService.createDefaultPoliciesForNewLounge(loungeId, requestDto);
+    }
+
     public List<LoungeDto> findLoungeList() {
         return loungeDao.selectAllLounges();
     }
 
-    // ===== 라운지 상세 조회 =====
     public LoungeDto findLoungeDetail(int loungeId) {
         if (!isValidId(loungeId)) {
             return null;
@@ -38,7 +58,6 @@ public class LoungeService {
         return loungeDao.selectLoungeById(loungeId);
     }
 
-    // ===== 라운지 수정 =====
     public boolean updateLounge(int loungeId, String loungeName) {
         if (!isValidId(loungeId) || !hasText(loungeName)) {
             return false;
@@ -50,5 +69,4 @@ public class LoungeService {
         LoungeDto loungeDto = new LoungeDto(loungeId, loungeName);
         return loungeDao.updateLounge(loungeDto) > 0;
     }
-
 }

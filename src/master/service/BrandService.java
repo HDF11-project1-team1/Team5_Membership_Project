@@ -3,18 +3,21 @@ package master.service;
 import master.dao.BrandDao;
 import master.dao.CategoryDao;
 import master.dto.BrandDto;
+import master.dto.request.BrandRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
 import static common.validation.InputValidator.hasText;
 import static common.validation.InputValidator.isValidId;
+import static common.validation.InputValidator.isValidMileageRate;
 
 public class BrandService {
 
     private final BrandDao brandDao = new BrandDao();
     private final CategoryDao categoryDao = new CategoryDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
-    // ===== 브랜드 등록 =====
     public boolean registerBrand(String brandName, int categoryId) {
         if (!hasText(brandName) || !isValidId(categoryId)) {
             return false;
@@ -30,12 +33,36 @@ public class BrandService {
         return brandDao.insertBrand(brandDto) > 0;
     }
 
-    // ===== 브랜드 목록 조회 =====
+    public boolean registerBrand(BrandRegisterRequestDto requestDto) {
+        if (requestDto == null) {
+            return false;
+        }
+        if (!hasText(requestDto.getBrandName()) || !isValidId(requestDto.getCategoryId())) {
+            return false;
+        }
+        if (!isValidMileageRate(requestDto.getDefaultMileageRate())) {
+            return false;
+        }
+        if (!categoryDao.existsCategoryId(requestDto.getCategoryId())) {
+            return false;
+        }
+        if (brandDao.existsBrandName(requestDto.getBrandName())) {
+            return false;
+        }
+
+        BrandDto brandDto = new BrandDto(0, requestDto.getCategoryId(), requestDto.getBrandName());
+        int brandId = brandDao.insertBrandAndReturnId(brandDto);
+        if (!isValidId(brandId)) {
+            return false;
+        }
+
+        return defaultPolicyService.createDefaultPoliciesForNewBrand(brandId, requestDto);
+    }
+
     public List<BrandDto> findBrandList() {
         return brandDao.selectAllBrands();
     }
 
-    // ===== 브랜드 상세 조회 =====
     public BrandDto findBrandDetail(int brandId) {
         if (!isValidId(brandId)) {
             return null;
@@ -43,7 +70,6 @@ public class BrandService {
         return brandDao.selectBrandById(brandId);
     }
 
-    // ===== 카테고리로 브랜드 찾기 =====
     public List<BrandDto> findBrandListByCategory(int categoryId) {
         if (!isValidId(categoryId)) {
             return null;
@@ -51,7 +77,6 @@ public class BrandService {
         return brandDao.selectBrandsByCategoryId(categoryId);
     }
 
-    // ===== 브랜드 수정 =====
     public boolean updateBrand(int brandId, String brandName, int categoryId) {
         if (!isValidId(brandId) || !hasText(brandName) || !isValidId(categoryId)) {
             return false;
@@ -63,5 +88,4 @@ public class BrandService {
         BrandDto brandDto = new BrandDto(brandId, categoryId, brandName);
         return brandDao.updateBrand(brandDto) > 0;
     }
-
 }
