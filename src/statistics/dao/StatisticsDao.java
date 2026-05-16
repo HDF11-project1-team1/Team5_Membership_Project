@@ -1,5 +1,7 @@
 package statistics.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
 import statistics.dto.MonthlyStatDto;
@@ -30,7 +32,7 @@ public class StatisticsDao {
                 list.add(new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
             }
         } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeQuery: " + e.getMessage());
+            throw new DataAccessException("통계 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -57,7 +59,7 @@ public class StatisticsDao {
                 list.add(new StatDto(rs.getString(1), rs.getLong(2), rs.getLong(3)));
             }
         } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeBenefitQuery: " + e.getMessage());
+            throw new DataAccessException("혜택 통계 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -81,7 +83,7 @@ public class StatisticsDao {
                 list.add(new MonthlyStatDto(rs.getString(1), rs.getInt(2), rs.getLong(3), rs.getLong(4)));
             }
         } catch (SQLException e) {
-            System.out.println("StatisticsDao.executeMonthlyQuery: " + e.getMessage());
+            throw new DataAccessException("월별 통계 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);

@@ -1,5 +1,7 @@
 package user.dao;
 
+import common.exception.DataAccessException;
+
 import common.connection.DBConnection;
 import common.connection.DBType;
 import membership.dto.MembershipDto;
@@ -38,7 +40,7 @@ public class UserDao {
                 userList.add(mapUser(rs));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -74,7 +76,7 @@ public class UserDao {
                 user = mapUserTotalInfo(rs);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -114,7 +116,7 @@ public class UserDao {
                 membershipList.add(membership);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -146,7 +148,7 @@ public class UserDao {
                 userList.add(mapUser(rs));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("멤버십별 회원 목록을 조회하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(rs);
             DBConnection.close(pstmt);
@@ -206,16 +208,14 @@ public class UserDao {
             try {
                 conn.rollback();
             } catch (Exception e1) {
-                System.out.println(e1.getMessage());
+                throw new DataAccessException("회원 등록 롤백 중 오류가 발생했습니다.", e1);
             }
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원을 등록하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(pstmt);
             resetAutoCommit(conn);
             DBConnection.close(conn);
         }
-
-        return 0;
     }
 
     // 5. 회원 정보 수정
@@ -242,13 +242,11 @@ public class UserDao {
 
             return pstmt.executeUpdate();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new DataAccessException("회원 정보를 수정하는 중 오류가 발생했습니다.", e);
         } finally {
             DBConnection.close(pstmt);
             DBConnection.close(conn);
         }
-
-        return 0;
     }
 
     private UserDto mapUser(ResultSet rs) throws Exception {
@@ -349,7 +347,7 @@ public class UserDao {
             try {
                 conn.setAutoCommit(true);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                throw new DataAccessException("커밋 모드를 복구하는 중 오류가 발생했습니다.", e);
             }
         }
     }
