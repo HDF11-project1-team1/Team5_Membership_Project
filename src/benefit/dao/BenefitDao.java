@@ -51,6 +51,45 @@ public class BenefitDao {
     }
 
 
+    // 라운지명으로 라운지 ID를 조회한다.
+    public int selectLoungeIdByName(Connection conn, String loungeName) throws Exception {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "SELECT lounge_id FROM lounge WHERE lounge_name = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, loungeName);
+            rs = pstmt.executeQuery();
+            if (rs.next())
+                return rs.getInt("lounge_id");
+            return -1;
+        } finally {
+            DBConnection.close(rs);
+            DBConnection.close(pstmt);
+        }
+    }
+
+    // 당일 라운지 이용 이력이 있는지 확인한다.
+    public boolean existsLoungeHistoryToday(Connection conn, int userId, int loungeId) throws Exception {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "SELECT COUNT(*) FROM lounge_history WHERE user_id = ? AND lounge_id = ? AND TRUNC(entry_date) = TRUNC(SYSDATE)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, loungeId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            return false;
+        } finally {
+            DBConnection.close(rs);
+            DBConnection.close(pstmt);
+        }
+    }
+
+
     // 멤버십 등급별 Cafe-H 무료 커피 제공 개수를 조회한다.
     public int selectCafeHPolicyCount(Connection conn, String membershipGrade) throws Exception {
         PreparedStatement pstmt = null;
@@ -489,12 +528,25 @@ public class BenefitDao {
         }
     }
 
-    // 라운지 이용 가능 여부 조회 기능을 수행한다.
-    public boolean selectLoungePolicyAvailability(String membershipGrade, String branchName, String loungeName) {
+    // 회원명, 지점명, 라운지명으로 라운지 이용 가능 여부를 조회한다.
+    public boolean selectLoungePolicyAvailability(String name, String branchName, String loungeName) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection(DBType.ORACLE);
-            return selectLoungePolicyAvailable(conn, membershipGrade, branchName, loungeName);
+            UserInfoDto userInfo = selectUserInfoByName(conn, name);
+            if (userInfo == null) {
+                System.out.println("[라운지] 회원을 찾을 수 없습니다.");
+                return false;
+            }
+
+            // 당일 이용 이력 체크 (특정 라운지 기준)
+            int loungeId = selectLoungeIdByName(conn, loungeName);
+            if (loungeId != -1 && existsLoungeHistoryToday(conn, userInfo.getUserId(), loungeId)) {
+                System.out.println("[라운지] 오늘 이미 " + loungeName + "을(를) 이용하셨습니다.");
+                return false;
+            }
+
+            return selectLoungePolicyAvailable(conn, userInfo.getMembershipGrade(), branchName, loungeName);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
