@@ -84,12 +84,7 @@ public class HomePanel extends JPanel {
             
             final String code = panelCodes[i];
             btn.addActionListener(e -> {
-                // 정책 관리는 미구현 상태이므로 막아두기
-                if (code.equals("POLICY")) {
-                    JOptionPane.showMessageDialog(this, "정책 관리 로직은 아직 개발 전이므로 연동이 보류되었습니다.", "안내", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    mainFrame.switchPanel(code);
-                }
+                mainFrame.switchPanel(code);
             });
             gridPanel.add(btn);
         }

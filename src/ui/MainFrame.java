@@ -3,6 +3,8 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import ui.panels.HomePanel;
+import ui.panels.user.UserPanel;
+import ui.panels.policy.PolicyPanel;
 
 public class MainFrame extends JFrame {
     private JPanel cardPanel;
@@ -10,9 +12,9 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setTitle("현대백화점 VIP 멤버십 관리 프로그램");
-        setSize(1000, 700); // 넉넉한 창 크기 설정
+        setSize(1200, 800); // 패널 크기를 고려하여 창 크기 상향 조정
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // 화면 중앙에 띄우기
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // 1. 네비게이션 바 (좌측)
@@ -24,13 +26,10 @@ public class MainFrame extends JFrame {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(UIConstants.BACKGROUND_COLOR);
 
-        // 홈 화면(메인 메뉴 버튼들) 패널 생성 및 추가
-        HomePanel homePanel = new HomePanel(this);
-        cardPanel.add(homePanel, "HOME");
-
-        // TODO: 향후 생성될 기능별 패널들을 여기에 추가합니다.
-        // cardPanel.add(new UserPanel(this), "USER");
-        // cardPanel.add(new StatPanel(this), "STAT");
+        // 패널들 생성 및 추가
+        cardPanel.add(new HomePanel(this), "HOME");
+        cardPanel.add(new UserPanel(this), "USER");
+        cardPanel.add(new PolicyPanel(this), "POLICY");
 
         add(cardPanel, BorderLayout.CENTER);
 
