@@ -147,9 +147,13 @@ public class MasterPanel extends JPanel {
 
         JPanel leftP = new JPanel(new BorderLayout(0, 10));
         leftP.setBackground(Color.WHITE);
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+
         JLabel lbl = new JLabel(listTitle);
         lbl.setFont(UIConstants.SUBHEADER_FONT);
-        leftP.add(lbl, BorderLayout.NORTH);
+        headerPanel.add(lbl, BorderLayout.WEST);
 
         Object[][] initialData;
         try {
@@ -162,6 +166,26 @@ public class MasterPanel extends JPanel {
         DefaultTableModel model = new DefaultTableModel(initialData, cols);
         StyledTable table = new StyledTable(model);
         leftP.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // 새로고침 액션 정의
+        Runnable refreshAction = () -> {
+            try {
+                model.setDataVector(fetcher.fetch(), cols);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(mainP, "새로고침 중 오류 발생: " + ex.getMessage(), "에러", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+
+        RoundedButton refreshBtn = new RoundedButton("새로고침", UIConstants.SECONDARY_BTN_COLOR, UIConstants.SECONDARY_BTN_HOVER, UIConstants.SECONDARY_BTN_TEXT);
+        refreshBtn.setFont(UIConstants.BODY_BOLD_FONT);
+        refreshBtn.addActionListener(e -> {
+            refreshAction.run();
+            JOptionPane.showMessageDialog(mainP, "새로고침 완료!");
+        });
+        headerPanel.add(refreshBtn, BorderLayout.EAST);
+
+        leftP.add(headerPanel, BorderLayout.NORTH);
 
         JPanel rightP = new JPanel();
         rightP.setLayout(new BoxLayout(rightP, BoxLayout.Y_AXIS));
@@ -202,7 +226,7 @@ public class MasterPanel extends JPanel {
                 for(int i=0; i<fields.length; i++) values[i] = fields[i].getText();
                 if(saver.save(values)) {
                     JOptionPane.showMessageDialog(this, "등록 성공!");
-                    model.setDataVector(fetcher.fetch(), cols);
+                    refreshAction.run();
                     for(RoundedTextField f : fields) f.setText("");
                 }
             } catch (Exception ex) {

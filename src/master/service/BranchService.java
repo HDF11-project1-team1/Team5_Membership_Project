@@ -31,7 +31,16 @@ public class BranchService {
         }
 
         BranchDto branchDto = new BranchDto(0, branchName, branchAddress);
-        return branchDao.insertBranch(branchDto) > 0;
+        int branchId = branchDao.insertBranchAndReturnId(branchDto);
+        if (branchId <= 0) {
+            return false;
+        }
+
+        BranchRegisterRequestDto requestDto = new BranchRegisterRequestDto();
+        requestDto.setBranchName(branchName);
+        requestDto.setBranchAddress(branchAddress);
+
+        return defaultPolicyService.createDefaultPoliciesForNewBranch(branchId, requestDto);
     }
 
     // ===== 전체 지점 목록 조회 =====

@@ -170,6 +170,7 @@ public class UserPanel extends JPanel {
             BorderFactory.createLineBorder(UIConstants.LINE_COLOR),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
+        statsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         gradeLabel = createStatLabel("현재 등급", "-");
         vipAmountLabel = createStatLabel("VIP 선정 적립금", "0원");
@@ -203,6 +204,7 @@ public class UserPanel extends JPanel {
         employeeCheck = new JCheckBox("임직원 여부");
         employeeCheck.setBackground(Color.WHITE);
         employeeCheck.setFont(UIConstants.BODY_FONT);
+        employeeCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(employeeCheck);
         contentPanel.add(Box.createVerticalStrut(20));
 
@@ -260,10 +262,13 @@ public class UserPanel extends JPanel {
         JLabel label = new JLabel(labelText);
         label.setFont(UIConstants.CAPTION_FONT);
         label.setForeground(UIConstants.TEXT_SECONDARY);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         parent.add(label);
         parent.add(Box.createVerticalStrut(5));
         
         RoundedTextField field = new RoundedTextField(20);
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, field.getPreferredSize().height));
+        field.setAlignmentX(Component.LEFT_ALIGNMENT);
         parent.add(field);
         parent.add(Box.createVerticalStrut(15));
         return field;
