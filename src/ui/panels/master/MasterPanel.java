@@ -13,13 +13,15 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class MasterPanel extends JPanel {
+public class MasterPanel extends JPanel implements ui.Refreshable {
     private MainFrame mainFrame;
     private BrandService brandService = new BrandService();
     private BranchService branchService = new BranchService();
     private LoungeService loungeService = new LoungeService();
     private PaymentService paymentService = new PaymentService();
     private CategoryService categoryService = new CategoryService();
+    private JTabbedPane tabbedPane;
+    private java.util.List<Runnable> refreshActions = new java.util.ArrayList<>();
 
     public MasterPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -35,7 +37,7 @@ public class MasterPanel extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
 
         // 중앙 탭 패널
-        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane = new JTabbedPane();
         tabbedPane.setFont(UIConstants.BODY_BOLD_FONT);
         tabbedPane.setBackground(Color.WHITE);
 
@@ -176,6 +178,7 @@ public class MasterPanel extends JPanel {
                 JOptionPane.showMessageDialog(mainP, "새로고침 중 오류 발생: " + ex.getMessage(), "에러", JOptionPane.ERROR_MESSAGE);
             }
         };
+        refreshActions.add(refreshAction);
 
         RoundedButton refreshBtn = new RoundedButton("새로고침", UIConstants.SECONDARY_BTN_COLOR, UIConstants.SECONDARY_BTN_HOVER, UIConstants.SECONDARY_BTN_TEXT);
         refreshBtn.setFont(UIConstants.BODY_BOLD_FONT);
@@ -252,5 +255,12 @@ public class MasterPanel extends JPanel {
 
     interface SaveAction {
         boolean save(String[] fields) throws Exception;
+    }
+
+    @Override
+    public void refresh() {
+        if (tabbedPane != null && tabbedPane.getSelectedIndex() >= 0 && tabbedPane.getSelectedIndex() < refreshActions.size()) {
+            refreshActions.get(tabbedPane.getSelectedIndex()).run();
+        }
     }
 }

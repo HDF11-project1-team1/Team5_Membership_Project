@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class UserPanel extends JPanel {
+public class UserPanel extends JPanel implements ui.Refreshable {
     private MainFrame mainFrame;
     private UserService userService;
     private JTable userTable;
@@ -372,6 +372,14 @@ public class UserPanel extends JPanel {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "저장 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    @Override
+    public void refresh() {
+        if (membershipFilter != null) {
+            membershipFilter.setSelectedIndex(0);
+        }
+        loadUserData();
     }
 }
 

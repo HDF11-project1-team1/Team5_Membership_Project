@@ -15,7 +15,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 
-public class StatPanel extends JPanel {
+public class StatPanel extends JPanel implements ui.Refreshable {
     private StatisticsService statService;
     private JComboBox<Integer> yearCombo;
     private JComboBox<Integer> monthCombo;
@@ -93,6 +93,11 @@ public class StatPanel extends JPanel {
 
         mainTabs.revalidate();
         mainTabs.repaint();
+    }
+
+    @Override
+    public void refresh() {
+        loadAllData();
     }
 
     // 1. 종합 구매 통계 탭

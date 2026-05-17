@@ -15,7 +15,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
-public class VipPanel extends JPanel {
+public class VipPanel extends JPanel implements ui.Refreshable {
     private MainFrame mainFrame;
     private MembershipService membershipService;
     private JTable vipTable;
@@ -144,5 +144,12 @@ public class VipPanel extends JPanel {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "조회 실패: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void refresh() {
+        if (nameField != null) nameField.setText("");
+        if (birthField != null) birthField.setText("");
+        loadCurrentGrades();
     }
 }

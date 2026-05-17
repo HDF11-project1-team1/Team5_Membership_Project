@@ -15,6 +15,10 @@ public class MainFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel navPanel;
     private JLabel titleLabel;
+    
+    // 네비게이션 활성화 관리를 위한 버튼 참조 리스트
+    private java.util.List<JButton> navButtons = new java.util.ArrayList<>();
+    private JButton activeNavButton;
 
     // 각 패널 참조
     private UserPanel userPanel;
@@ -61,7 +65,8 @@ public class MainFrame extends JFrame {
 
         add(cardPanel, BorderLayout.CENTER);
 
-        cardLayout.show(cardPanel, "HOME");
+        // 첫 화면 HOME 네비게이션 동기화 활성화
+        switchPanel("HOME");
     }
 
     private JPanel createNavPanel() {
@@ -104,6 +109,7 @@ public class MainFrame extends JFrame {
 
     private JButton createNavButton(String text, String panelName, String iconFile) {
         JButton btn = new JButton(text);
+        btn.putClientProperty("panelName", panelName);
 
         if (iconFile != null) {
             try {
@@ -122,6 +128,8 @@ public class MainFrame extends JFrame {
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
+        btn.setOpaque(true); // 배경색 표시를 위해 true 설정
+        btn.setBackground(UIConstants.SURFACE_COLOR);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setMaximumSize(new Dimension(220, 50));
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -132,18 +140,50 @@ public class MainFrame extends JFrame {
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setForeground(UIConstants.PRIMARY_COLOR);
+                if (activeNavButton != btn) {
+                    btn.setForeground(UIConstants.PRIMARY_COLOR);
+                    btn.setBackground(new Color(0xF2F4F6));
+                    btn.setContentAreaFilled(true);
+                }
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setForeground(UIConstants.TEXT_MAIN);
+                if (activeNavButton != btn) {
+                    btn.setForeground(UIConstants.TEXT_MAIN);
+                    btn.setBackground(UIConstants.SURFACE_COLOR);
+                    btn.setContentAreaFilled(false);
+                }
             }
         });
 
+        navButtons.add(btn);
         return btn;
     }
 
     public void switchPanel(String panelName) {
         cardLayout.show(cardPanel, panelName);
+
+        // 1. 네비게이션 버튼 활성화 스타일 전환
+        for (JButton navBtn : navButtons) {
+            String name = (String) navBtn.getClientProperty("panelName");
+            if (panelName.equals(name)) {
+                activeNavButton = navBtn;
+                navBtn.setForeground(UIConstants.PRIMARY_COLOR);
+                navBtn.setBackground(new Color(0xE8F3FF)); // 연한 블루 하이라이트배경 카드
+                navBtn.setContentAreaFilled(true);
+            } else {
+                navBtn.setForeground(UIConstants.TEXT_MAIN);
+                navBtn.setBackground(UIConstants.SURFACE_COLOR);
+                navBtn.setContentAreaFilled(false);
+            }
+        }
+
+        // 2. 대상 패널 자동 갱신(Auto-Refresh) 트리거 호출
+        Component[] components = cardPanel.getComponents();
+        for (Component comp : components) {
+            if (comp.isVisible() && comp instanceof Refreshable) {
+                ((Refreshable) comp).refresh();
+            }
+        }
     }
 }
