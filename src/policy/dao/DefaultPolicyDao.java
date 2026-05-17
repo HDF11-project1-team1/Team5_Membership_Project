@@ -114,7 +114,7 @@ public class DefaultPolicyDao {
     }
 
     private Connection openTransaction() throws SQLException {
-        Connection conn = DBConnection.getConnection(DBType.LOCALDB);
+        Connection conn = DBConnection.getConnection(DBType.ORACLE);
         if (conn == null) {
             throw new SQLException("DB connection failed");
         }

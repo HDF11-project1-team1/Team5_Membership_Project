@@ -5,6 +5,8 @@ import common.exception.NotFoundException;
 import common.exception.ValidationException;
 import master.dao.LoungeDao;
 import master.dto.LoungeDto;
+import master.dto.request.LoungeRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import static common.validation.InputValidator.isValidId;
 public class LoungeService {
 
     private final LoungeDao loungeDao = new LoungeDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
     // ===== 라운지 등록 =====
     public boolean registerLounge(String loungeName) {
@@ -25,7 +28,15 @@ public class LoungeService {
         }
 
         LoungeDto loungeDto = new LoungeDto(0, loungeName);
-        return loungeDao.insertLounge(loungeDto) > 0;
+        int loungeId = loungeDao.insertLoungeAndReturnId(loungeDto);
+        if (loungeId <= 0) {
+            return false;
+        }
+
+        LoungeRegisterRequestDto requestDto = new LoungeRegisterRequestDto();
+        requestDto.setLoungeName(loungeName);
+
+        return defaultPolicyService.createDefaultPoliciesForNewLounge(loungeId, requestDto);
     }
 
     // ===== 라운지 목록 조회 =====

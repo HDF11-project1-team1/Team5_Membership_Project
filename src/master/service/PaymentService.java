@@ -5,6 +5,8 @@ import common.exception.NotFoundException;
 import common.exception.ValidationException;
 import master.dao.PaymentDao;
 import master.dto.PaymentDto;
+import master.dto.request.PaymentRegisterRequestDto;
+import policy.service.DefaultPolicyService;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import static common.validation.InputValidator.isValidId;
 public class PaymentService {
 
     private final PaymentDao paymentDao = new PaymentDao();
+    private final DefaultPolicyService defaultPolicyService = new DefaultPolicyService();
 
     // ===== 결제수단 등록 =====
     public boolean registerPayment(String paymentType) {
@@ -25,7 +28,15 @@ public class PaymentService {
         }
 
         PaymentDto paymentDto = new PaymentDto(0, paymentType);
-        return paymentDao.insertPayment(paymentDto) > 0;
+        int paymentId = paymentDao.insertPaymentAndReturnId(paymentDto);
+        if (paymentId <= 0) {
+            return false;
+        }
+
+        PaymentRegisterRequestDto requestDto = new PaymentRegisterRequestDto();
+        requestDto.setPaymentType(paymentType);
+
+        return defaultPolicyService.createDefaultPoliciesForNewPayment(paymentId, requestDto);
     }
 
     // ===== 결제수단 목록 조회 =====

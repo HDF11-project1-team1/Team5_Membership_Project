@@ -16,7 +16,7 @@ public class JdbcTemplate {
     private final DBType dbType;
 
     public JdbcTemplate() {
-        this(DBType.LOCALDB);
+        this(DBType.ORACLE);
     }
 
     public JdbcTemplate(DBType dbType) {
@@ -30,8 +30,7 @@ public class JdbcTemplate {
     public int update(String sql, PreparedStatementSetter setter) {
         try (
                 Connection conn = DBConnection.getConnection(dbType);
-                PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             setParameters(pstmt, setter);
             return pstmt.executeUpdate();
         } catch (SQLException | NullPointerException e) {
@@ -48,8 +47,7 @@ public class JdbcTemplate {
 
         try (
                 Connection conn = DBConnection.getConnection(dbType);
-                PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             setParameters(pstmt, setter);
 
             try (ResultSet rs = pstmt.executeQuery()) {

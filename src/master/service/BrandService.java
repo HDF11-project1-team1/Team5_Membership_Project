@@ -34,7 +34,16 @@ public class BrandService {
         }
 
         BrandDto brandDto = new BrandDto(0, categoryId, brandName);
-        return brandDao.insertBrand(brandDto) > 0;
+        int brandId = brandDao.insertBrandAndReturnId(brandDto);
+        if (brandId <= 0) {
+            return false;
+        }
+
+        BrandRegisterRequestDto requestDto = new BrandRegisterRequestDto();
+        requestDto.setBrandName(brandName);
+        requestDto.setCategoryId(categoryId);
+
+        return defaultPolicyService.createDefaultPoliciesForNewBrand(brandId, requestDto);
     }
 
     // ===== 브랜드 목록 조회 =====
