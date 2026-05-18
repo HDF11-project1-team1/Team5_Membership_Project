@@ -47,7 +47,7 @@ public class StatPanel extends JPanel implements ui.Refreshable {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, UIConstants.LINE_COLOR),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)));
 
-        JLabel title = new JLabel("통계 및 분석 Dashboard");
+        JLabel title = new JLabel("통계 및 분석");
         title.setFont(UIConstants.HEADER_FONT);
         title.setForeground(UIConstants.TEXT_MAIN);
         panel.add(title, BorderLayout.WEST);
@@ -110,30 +110,38 @@ public class StatPanel extends JPanel implements ui.Refreshable {
         gbc.weightx = 1.0;
 
         // 1행: 멤버십 등급별 비중 (단독 배치로 강조)
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
         p.add(new ChartContainer("멤버십 등급별 매출 비중", new SimplePieChart(statService.getStatByMembership(y, m))), gbc);
 
         // 2행: 지점 및 브랜드 실적 (가로 배치)
-        gbc.gridy = 1; gbc.gridwidth = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
         List<StatDto> branchData = statService.getStatByBranch(y, m);
         ChartContainer branchChart = new ChartContainer("지점별 실적", new HorizontalBarChart(branchData));
         branchChart.setPreferredSize(new Dimension(500, Math.max(350, branchData.size() * 40 + 60)));
-        gbc.gridx = 0; p.add(branchChart, gbc);
+        gbc.gridx = 0;
+        p.add(branchChart, gbc);
 
         List<StatDto> brandData = statService.getStatByBrand(y, m);
         ChartContainer brandChart = new ChartContainer("브랜드별 실적", new HorizontalBarChart(brandData));
         brandChart.setPreferredSize(new Dimension(500, Math.max(350, brandData.size() * 40 + 60)));
-        gbc.gridx = 1; p.add(brandChart, gbc);
+        gbc.gridx = 1;
+        p.add(brandChart, gbc);
 
         // 3행: 결제수단 및 카테고리 비중 (가로 배치)
-        gbc.gridy = 2; gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridx = 0;
         p.add(new ChartContainer("결제수단별 비중", new SimplePieChart(statService.getStatByPayment(y, m))), gbc);
-        
+
         gbc.gridx = 1;
         p.add(new ChartContainer("카테고리별 매출 비중", new SimplePieChart(statService.getStatByCategory(y, m))), gbc);
 
         // 4행: 카테고리별 상세 실적 (하단 전체 너비, 스크롤 가능)
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
         gbc.weighty = 1.0;
         JPanel detailTable = createDetailTablePanel("카테고리별 상세 실적 목록", statService.getStatByCategory(y, m));
         detailTable.setPreferredSize(new Dimension(1000, 400));
@@ -445,7 +453,8 @@ public class StatPanel extends JPanel implements ui.Refreshable {
                     int newHover = calculateHoverIndex(e.getPoint());
                     if (newHover != hoverIndex) {
                         hoverIndex = newHover;
-                        setCursor(hoverIndex != -1 ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR) : Cursor.getDefaultCursor());
+                        setCursor(hoverIndex != -1 ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                                : Cursor.getDefaultCursor());
                         repaint();
                     }
                 }
@@ -460,23 +469,26 @@ public class StatPanel extends JPanel implements ui.Refreshable {
         }
 
         private int calculateHoverIndex(Point p) {
-            if (data == null || data.isEmpty()) return -1;
+            if (data == null || data.isEmpty())
+                return -1;
             int w = getWidth(), h = getHeight(), size = Math.min(w - 250, h - 60);
             int x = (w - 250 - size) / 2 + 20, y = (h - size) / 2;
             int cx = x + size / 2, cy = y + size / 2;
-            
+
             double dx = p.x - cx;
             double dy = p.y - cy;
             double dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist < size / 4.0 || dist > size / 2.0) return -1;
-            
+
+            if (dist < size / 4.0 || dist > size / 2.0)
+                return -1;
+
             double angle = Math.toDegrees(Math.atan2(-dy, dx));
             double adjustedAngle = (90 - angle + 360) % 360;
-            
+
             long total = data.stream().mapToLong(StatDto::getAmount).sum();
-            if (total == 0) return -1;
-            
+            if (total == 0)
+                return -1;
+
             double curAngle = 0;
             for (int i = 0; i < data.size(); i++) {
                 double sliceAngle = (data.get(i).getAmount() * 360.0) / total;
@@ -494,7 +506,8 @@ public class StatPanel extends JPanel implements ui.Refreshable {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             long total = data.stream().mapToLong(StatDto::getAmount).sum();
-            if (total == 0) return;
+            if (total == 0)
+                return;
 
             int w = getWidth(), h = getHeight(), size = Math.min(w - 250, h - 60);
             int x = (w - 250 - size) / 2 + 20, y = (h - size) / 2;
@@ -503,7 +516,7 @@ public class StatPanel extends JPanel implements ui.Refreshable {
             for (int i = 0; i < data.size(); i++) {
                 StatDto d = data.get(i);
                 double angle = (d.getAmount() * 360.0) / total;
-                
+
                 Color c = colors[i % colors.length];
                 if (hoverIndex == i) {
                     g2.setColor(c.brighter());
@@ -512,7 +525,7 @@ public class StatPanel extends JPanel implements ui.Refreshable {
                     g2.setColor(c);
                     g2.fill(new Arc2D.Double(x, y, size, size, curAngle, -angle, Arc2D.PIE));
                 }
-                
+
                 // 범례
                 int legendY = 30 + i * 22;
                 g2.setColor(c);
@@ -523,12 +536,13 @@ public class StatPanel extends JPanel implements ui.Refreshable {
                 g2.drawString(d.getLabel() + " (" + valStr + ")", w - 205, legendY + 10);
 
                 curAngle -= angle;
-                if (i >= 10) break;
+                if (i >= 10)
+                    break;
             }
             // 도넛 구멍
             g2.setColor(Color.WHITE);
             g2.fillOval(x + size / 4, y + size / 4, size / 2, size / 2);
-            
+
             // 툴팁 (추가)
             if (hoverIndex != -1 && mousePos != null && hoverIndex < data.size()) {
                 drawTooltip(g2, data.get(hoverIndex));
@@ -539,16 +553,18 @@ public class StatPanel extends JPanel implements ui.Refreshable {
             String text = d.getLabel() + ": " + df.format(d.getCount()) + "건 / " + df.format(d.getAmount()) + "원";
             g2.setFont(UIConstants.BODY_BOLD_FONT);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            
+
             FontMetrics fm = g2.getFontMetrics();
             int tw = fm.stringWidth(text) + 20;
             int th = 30;
             int tx = mousePos.x + 15;
             int ty = mousePos.y - 15;
-            
-            if (tx + tw > getWidth()) tx = mousePos.x - tw - 5;
-            if (ty - th < 0) ty = mousePos.y + 35;
-            
+
+            if (tx + tw > getWidth())
+                tx = mousePos.x - tw - 5;
+            if (ty - th < 0)
+                ty = mousePos.y + 35;
+
             g2.setColor(new Color(0, 0, 0, 180));
             g2.fillRoundRect(tx, ty - th, tw, th, 10, 10);
             g2.setColor(Color.WHITE);

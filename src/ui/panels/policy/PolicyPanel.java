@@ -27,16 +27,25 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class PolicyPanel extends JPanel {
+public class PolicyPanel extends JPanel implements ui.Refreshable {
 
     private final PolicyUpdateService policyService;
     private JTabbedPane tabbedPane;
+
+    // Selection panels and tabs to reload
+    private final List<SelectionPanel> branchPanels = new ArrayList<>();
+    private final List<SelectionPanel> brandPanels = new ArrayList<>();
+    private final List<SelectionPanel> paymentPanels = new ArrayList<>();
+    private final List<SelectionPanel> membershipPanels = new ArrayList<>();
+    private final List<SelectionPanel> loungePanels = new ArrayList<>();
+    private final List<PolicyTab> policyTabs = new ArrayList<>();
 
     public PolicyPanel(MainFrame mainFrame) {
         this.policyService = new PolicyUpdateService();
@@ -45,10 +54,28 @@ public class PolicyPanel extends JPanel {
         setBackground(UIConstants.BACKGROUND_COLOR);
         setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+
         JLabel titleLabel = new JLabel("정책 관리");
         titleLabel.setFont(UIConstants.HEADER_FONT);
         titleLabel.setForeground(UIConstants.TEXT_MAIN);
-        add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+
+        RoundedButton refreshButton = new RoundedButton("새로고침", UIConstants.PRIMARY_COLOR, UIConstants.PRIMARY_HOVER, Color.WHITE);
+        refreshButton.setFont(UIConstants.BODY_BOLD_FONT);
+        refreshButton.setPreferredSize(new Dimension(100, 36));
+        refreshButton.addActionListener(e -> {
+            refreshAll();
+            JOptionPane.showMessageDialog(this, "지점, 브랜드, 결제수단 등의 정보가 동기화되었습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
+        });
+        
+        JPanel btnWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        btnWrapper.setOpaque(false);
+        btnWrapper.add(refreshButton);
+        
+        headerPanel.add(btnWrapper, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
 
         tabbedPane = new JTabbedPane();
         tabbedPane.setFont(UIConstants.BODY_BOLD_FONT);
@@ -63,6 +90,39 @@ public class PolicyPanel extends JPanel {
         add(tabbedPane, BorderLayout.CENTER);
     }
 
+    @Override
+    public void refresh() {
+        refreshAll();
+    }
+
+    public void refreshAll() {
+        List<PolicyOptionDto> branches = policyService.getBranches();
+        List<PolicyOptionDto> brands = policyService.getBrands();
+        List<PolicyOptionDto> payments = policyService.getPayments();
+        List<PolicyOptionDto> memberships = policyService.getMemberships();
+        List<PolicyOptionDto> lounges = policyService.getLounges();
+
+        for (SelectionPanel p : branchPanels) {
+            p.reloadOptions(branches);
+        }
+        for (SelectionPanel p : brandPanels) {
+            p.reloadOptions(brands);
+        }
+        for (SelectionPanel p : paymentPanels) {
+            p.reloadOptions(payments);
+        }
+        for (SelectionPanel p : membershipPanels) {
+            p.reloadOptions(memberships);
+        }
+        for (SelectionPanel p : loungePanels) {
+            p.reloadOptions(lounges);
+        }
+
+        for (PolicyTab tab : policyTabs) {
+            tab.refreshPreview();
+        }
+    }
+
     public void setTab(int index) {
         if (tabbedPane != null && index >= 0 && index < tabbedPane.getTabCount()) {
             tabbedPane.setSelectedIndex(index);
@@ -71,8 +131,11 @@ public class PolicyPanel extends JPanel {
 
     private JPanel createMileageTab() {
         SelectionPanel branches = new SelectionPanel("1. 변경 지점 선택", "전체 지점", policyService.getBranches());
+        branchPanels.add(branches);
         SelectionPanel brands = new SelectionPanel("2. 변경 브랜드 선택", "전체 브랜드", policyService.getBrands());
+        brandPanels.add(brands);
         SelectionPanel payments = new SelectionPanel("3. 변경 결제수단 선택", "전체 결제수단", policyService.getPayments());
+        paymentPanels.add(payments);
         RoundedTextField rateField = new RoundedTextField(10);
 
         PolicyTab tab = new PolicyTab(
@@ -85,12 +148,15 @@ public class PolicyPanel extends JPanel {
                 () -> policyService.updateMileageRate(branches.getSelectedIds(), brands.getSelectedIds(), payments.getSelectedIds(), Double.parseDouble(rateField.getText().trim()))
         );
         tab.addAutoRefreshField(rateField);
+        policyTabs.add(tab);
         return tab;
     }
 
     private JPanel createVipTab() {
         SelectionPanel branches = new SelectionPanel("1. 변경 지점 선택", "전체 지점", policyService.getBranches());
+        branchPanels.add(branches);
         SelectionPanel payments = new SelectionPanel("2. 변경 결제수단 선택", "전체 결제수단", policyService.getPayments());
+        paymentPanels.add(payments);
         RoundedTextField rateField = new RoundedTextField(10);
 
         PolicyTab tab = new PolicyTab(
@@ -103,12 +169,15 @@ public class PolicyPanel extends JPanel {
                 () -> policyService.updateVipRate(branches.getSelectedIds(), payments.getSelectedIds(), Double.parseDouble(rateField.getText().trim()))
         );
         tab.addAutoRefreshField(rateField);
+        policyTabs.add(tab);
         return tab;
     }
 
     private JPanel createValetTab() {
         SelectionPanel branches = new SelectionPanel("1. 변경 지점 선택", "전체 지점", policyService.getBranches());
+        branchPanels.add(branches);
         SelectionPanel memberships = new SelectionPanel("2. 변경 멤버십 선택", "전체 멤버십", policyService.getMemberships());
+        membershipPanels.add(memberships);
         RoundedTextField minField = new RoundedTextField(10);
         RoundedTextField maxField = new RoundedTextField(10);
         JCheckBox availableCheck = new JCheckBox("발레파킹 이용 가능");
@@ -127,12 +196,15 @@ public class PolicyPanel extends JPanel {
         tab.addAutoRefreshField(minField);
         tab.addAutoRefreshField(maxField);
         availableCheck.addActionListener(e -> tab.refreshPreview());
+        policyTabs.add(tab);
         return tab;
     }
 
     private JPanel createParkingTab() {
         SelectionPanel branches = new SelectionPanel("1. 변경 지점 선택", "전체 지점", policyService.getBranches());
+        branchPanels.add(branches);
         SelectionPanel memberships = new SelectionPanel("2. 변경 멤버십 선택", "전체 멤버십", policyService.getMemberships());
+        membershipPanels.add(memberships);
         JCheckBox availableCheck = new JCheckBox("무료주차 이용 가능");
         availableCheck.setSelected(true);
 
@@ -146,13 +218,17 @@ public class PolicyPanel extends JPanel {
                 () -> policyService.updateFreeParkingAvailable(branches.getSelectedIds(), memberships.getSelectedIds(), availableCheck.isSelected())
         );
         availableCheck.addActionListener(e -> tab.refreshPreview());
+        policyTabs.add(tab);
         return tab;
     }
 
     private JPanel createLoungeTab() {
         SelectionPanel branches = new SelectionPanel("1. 변경 지점 선택", "전체 지점", policyService.getBranches());
+        branchPanels.add(branches);
         SelectionPanel lounges = new SelectionPanel("2. 변경 라운지 선택", "전체 라운지", policyService.getLounges());
+        loungePanels.add(lounges);
         SelectionPanel memberships = new SelectionPanel("3. 변경 멤버십 선택", "전체 멤버십", policyService.getMemberships());
+        membershipPanels.add(memberships);
         JCheckBox availableCheck = new JCheckBox("라운지 이용 가능");
         availableCheck.setSelected(true);
 
@@ -166,6 +242,7 @@ public class PolicyPanel extends JPanel {
                 () -> policyService.updateLoungeAvailable(branches.getSelectedIds(), lounges.getSelectedIds(), memberships.getSelectedIds(), availableCheck.isSelected())
         );
         availableCheck.addActionListener(e -> tab.refreshPreview());
+        policyTabs.add(tab);
         return tab;
     }
 
@@ -439,6 +516,7 @@ public class PolicyPanel extends JPanel {
         private final JCheckBox allCheckBox;
         private final List<JCheckBox> itemCheckBoxes = new ArrayList<>();
         private final JLabel countLabel = new JLabel("선택 0개");
+        private final JPanel listPanel;
         private Runnable changeListener;
         private boolean internalChange;
 
@@ -454,7 +532,7 @@ public class PolicyPanel extends JPanel {
             titleLabel.setFont(UIConstants.BODY_BOLD_FONT);
             add(titleLabel, BorderLayout.NORTH);
 
-            JPanel listPanel = new JPanel();
+            listPanel = new JPanel();
             listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
             listPanel.setBackground(Color.WHITE);
 
@@ -493,6 +571,31 @@ public class PolicyPanel extends JPanel {
             countLabel.setFont(UIConstants.CAPTION_FONT);
             countLabel.setForeground(UIConstants.TEXT_SECONDARY);
             add(countLabel, BorderLayout.SOUTH);
+        }
+
+        void reloadOptions(List<PolicyOptionDto> options) {
+            internalChange = true;
+            itemCheckBoxes.clear();
+            listPanel.removeAll();
+            
+            allCheckBox.setSelected(false);
+            listPanel.add(allCheckBox);
+            listPanel.add(Box.createVerticalStrut(8));
+            
+            for (PolicyOptionDto option : options) {
+                JCheckBox checkBox = new JCheckBox("[" + option.getId() + "] " + option.getName());
+                checkBox.putClientProperty("id", option.getId());
+                checkBox.setBackground(Color.WHITE);
+                checkBox.setFont(UIConstants.BODY_FONT);
+                checkBox.addActionListener(e -> notifyChanged());
+                itemCheckBoxes.add(checkBox);
+                listPanel.add(checkBox);
+            }
+            
+            internalChange = false;
+            notifyChanged();
+            listPanel.revalidate();
+            listPanel.repaint();
         }
 
         void setChangeListener(Runnable changeListener) {
